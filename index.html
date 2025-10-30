@@ -77,7 +77,7 @@
       <h3 class="title">Archivos</h3>
       <div class="inputs">
         <div class="drop" data-which="VTEX">
-          <div><b>Base VTEX</b> <span class="hint">(.xlsx/.xls/.csv — admite múltiples)</span></div>
+          <div><b>Base VTEX</b> <span class="hint">(.xlsx/.xls/.csv — múltiples)</span></div>
           <input type="file" multiple hidden accept=".xlsx,.xls,.csv" />
           <div class="row">
             <button class="btn choose">Elegir</button>
@@ -110,19 +110,16 @@
           <div class="chips"></div>
         </div>
       </div>
-      <div class="hint" style="margin-top:8px">Feedback inmediato: verás chips con nombre y filas leídas.</div>
+      <div class="hint" style="margin-top:8px">Ves chips con nombre y <b>filas leídas</b> por archivo.</div>
     </div>
 
     <div class="card half">
       <h3 class="title">Parámetros</h3>
       <div class="row">
         <div>Periodo: <input id="periodo" class="mono" value="16 Sep al 15 Oct" /></div>
-        <div>Mes label (columna <i>Fechas Liquidacion</i>): <input id="mes" class="mono" value="Septiembre" /></div>
+        <div>Mes label (<i>Fechas Liquidacion</i>): <input id="mes" class="mono" value="Septiembre" /></div>
         <div>Detectar BSF por Decidir:
-          <select id="detectarBSF">
-            <option value="si" selected>Sí</option>
-            <option value="no">No</option>
-          </select>
+          <select id="detectarBSF"><option value="si" selected>Sí</option><option value="no">No</option></select>
         </div>
         <div>Salida:
           <select id="fmt"><option value="xlsx" selected>XLSX</option><option value="csv">CSV</option></select>
@@ -136,24 +133,11 @@
       <details>
         <summary>Abrir mapeo</summary>
         <div class="grid" style="margin-top:8px">
-          <div class="card half">
-            <h4>VTEX</h4><div class="map" id="mapVTEX"></div>
-          </div>
-          <div class="card half">
-            <h4>Devoluciones</h4><div class="map" id="mapDEV"></div>
-          </div>
-          <div class="card half">
-            <h4>Comisiones</h4><div class="map" id="mapCOM"></div>
-            <div class="hint">Seller, Emisor/Brand (BSF/Otro/Visa/Master), Cuotas (opcional), Comisión (%)</div>
-          </div>
-          <div class="card half">
-            <h4>Tasas</h4><div class="map" id="mapTAS"></div>
-            <div class="hint">Cuotas, TD% Con BSF, TD% Sin BSF</div>
-          </div>
-          <div class="card half">
-            <h4>Decidir</h4><div class="map" id="mapDEC"></div>
-            <div class="hint">Si no trae “Order”, se toma como resumen por Seller/Mes y se prorratea</div>
-          </div>
+          <div class="card half"><h4>VTEX</h4><div class="map" id="mapVTEX"></div></div>
+          <div class="card half"><h4>Devoluciones</h4><div class="map" id="mapDEV"></div></div>
+          <div class="card half"><h4>Comisiones</h4><div class="map" id="mapCOM"></div><div class="hint">Seller, Emisor/Brand, Cuotas (opcional), Comisión (%)</div></div>
+          <div class="card half"><h4>Tasas</h4><div class="map" id="mapTAS"></div><div class="hint">Cuotas, TD% Con BSF, TD% Sin BSF</div></div>
+          <div class="card half"><h4>Decidir</h4><div class="map" id="mapDEC"></div><div class="hint">Si no hay “Order”, se prorratea por Seller/Mes</div></div>
         </div>
       </details>
     </div>
@@ -166,11 +150,8 @@
         <button class="btn" id="btnDescargar" disabled>Descargar archivo</button>
         <button class="btn ghost" id="btnLog" disabled>Descargar Log</button>
       </div>
-      <details style="margin-top:10px">
-        <summary>Ver log</summary>
-        <pre id="logpre" class="mono hint"></pre>
-      </details>
-      <div class="footer">Output con hoja <b>LIQUIDACION</b> y columnas exactas del formato final.</div>
+      <details style="margin-top:10px"><summary>Ver log</summary><pre id="logpre" class="mono hint"></pre></details>
+      <div class="footer">Output: hoja <b>LIQUIDACION</b> con columnas exactas.</div>
     </div>
   </div>
 </div>
@@ -178,8 +159,8 @@
 <script>
 /* ======= UX helpers ======= */
 const $ = s=>document.querySelector(s);
-const toasts = $('#toasts');
-function toast(msg,type='info',ms=2000){
+const toasts = document.getElementById('toasts');
+function toast(msg,type='info',ms=2200){
   const t=document.createElement('div');
   t.className='toast '+type; t.textContent=msg; toasts.appendChild(t);
   setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(-6px)'; }, ms);
@@ -196,7 +177,7 @@ function setKPI(lines){ const box=$("#kpi"); box.innerHTML=''; (lines||[]).forEa
 /* ======= Data state ======= */
 const state = {
   raw:{ VTEX:[], DEV:[], COM:[], TAS:[], DEC:[] },
-  headers:{}, // first headers seen
+  headers:{}, // primeros headers detectados por tipo
   map:{VTEX:{}, DEV:{}, COM:{}, TAS:{}, DEC:{}},
   decidirGranular:false,
   out:[],
@@ -204,32 +185,103 @@ const state = {
   log:[]
 };
 
-/* ======= File reading ======= */
+/* ======= Normalizadores ======= */
+function norm(s){ return (s||'').toString().toLowerCase().replace(/\s+/g,' ').trim(); }
+function nnum(v){
+  if(typeof v==='number') return isNaN(v)?0:v;
+  if(typeof v==='string'){ const x=v.replace(/\./g,'').replace(/,/g,'.').replace(/[^0-9.-]/g,''); const n=parseFloat(x); return isNaN(n)?0:n; }
+  if(v==null) return 0;
+  return Number(v)||0;
+}
+function isBSF(issuer){ const s=norm(issuer); return s.includes('bsf')||s.includes('banco de servicios financieros'); }
+
+/* ======= Excel/CSV Robust Reader ======= */
+/* Heurística: elegir la hoja con más datos “válidos”, detectar fila de encabezados
+   buscando la primera fila con ≥2 celdas que parezcan columna (texto no numérico),
+   luego usarla como header. */
+function isHeaderCell(v){ 
+  if(v==null) return false;
+  const s=String(v).trim();
+  if(!s) return false;
+  // Evitar que números puros cuenten como header
+  return isNaN(Number(s));
+}
+function detectHeaderRow(matrix,maxScan=30){
+  for(let r=0; r<Math.min(matrix.length,maxScan); r++){
+    const row = matrix[r]||[];
+    const headerish = row.filter(c=>isHeaderCell(c)).length;
+    if(headerish>=2) return r;
+  }
+  return 0; // fallback
+}
+function sheetToMatrix(ws){
+  const range = XLSX.utils.decode_range(ws['!ref']||'A1:A1');
+  const out=[];
+  for(let R=range.s.r; R<=range.e.r; ++R){
+    const row=[];
+    for(let C=range.s.c; C<=range.e.c; ++C){
+      const addr = XLSX.utils.encode_cell({r:R,c:C});
+      const cell = ws[addr];
+      row.push(cell? cell.w ?? cell.v : null);
+    }
+    out.push(row);
+  }
+  return out;
+}
+function jsonFromAnySheet(ws){
+  const mat = sheetToMatrix(ws);
+  if(!mat.length) return [];
+  const hRow = detectHeaderRow(mat);
+  const headers = (mat[hRow]||[]).map(v=> String(v??'').trim());
+  const rows = [];
+  for(let r=hRow+1; r<mat.length; r++){
+    const obj={};
+    for(let c=0; c<headers.length; c++){
+      obj[ headers[c] || `col_${c}` ] = mat[r][c] ?? null;
+    }
+    // descartar filas totalmente vacías
+    if(Object.values(obj).some(v=> v!==null && String(v).trim()!=='')) rows.push(obj);
+  }
+  return {rows, headers};
+}
 async function readOne(file){
-  const buf = await file.arrayBuffer();
-  const isCSV = /\.csv$/i.test(file.name);
-  if(isCSV){
-    const data = new TextDecoder().decode(new Uint8Array(buf));
-    const wb = XLSX.read(data,{type:'string'});
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    return XLSX.utils.sheet_to_json(ws,{defval:null});
-  }else{
-    const wb = XLSX.read(buf,{type:'array'});
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    return XLSX.utils.sheet_to_json(ws,{defval:null});
+  try{
+    const buf = await file.arrayBuffer();
+    const isCSV = /\.csv$/i.test(file.name);
+
+    // CSV directo
+    if(isCSV){
+      const data = new TextDecoder().decode(new Uint8Array(buf));
+      const wb = XLSX.read(data,{type:'string',raw:false,cellText:true,cellDates:true});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(ws,{defval:null});
+      return {rows:json, headers: Object.keys(json[0]||{})};
+    }
+
+    // XLS/XLSX: leer TODAS las hojas y elegir la más densa
+    const wb = XLSX.read(buf,{type:'array',raw:false,cellText:true,cellDates:true});
+    let best = {rows:[], headers:[], score:-1, sheet:null};
+    wb.SheetNames.forEach(name=>{
+      const ws = wb.Sheets[name];
+      const {rows, headers} = jsonFromAnySheet(ws);
+      const score = (rows?.length||0) * (headers?.length||0);
+      if(score>best.score) best = {rows, headers, score, sheet:name};
+    });
+    if(best.score<=0) return {rows:[], headers:[]};
+    return {rows:best.rows, headers:best.headers};
+  }catch(err){
+    throw new Error(`No se pudo leer ${file.name}: ${err.message||err}`);
   }
 }
-function norm(s){ return (s||'').toString().toLowerCase().replace(/\s+/g,' ').trim(); }
 
-/* ======= Dropzones ======= */
-document.querySelectorAll('.drop').forEach(zone=>{
+/* ======= Dropzones (múltiples archivos) ======= */
+function wireDropZone(zone){
   const which = zone.dataset.which;
   const input = zone.querySelector('input[type=file]');
   const chips = zone.querySelector('.chips');
   const choose = zone.querySelector('.choose');
 
   function enableActions(){
-    // Mínimo: VTEX
     const hasVTEX = state.raw.VTEX.length>0;
     $('#btnAnalizar').disabled = !hasVTEX;
     $('#btnGenerar').disabled = !hasVTEX;
@@ -240,22 +292,22 @@ document.querySelectorAll('.drop').forEach(zone=>{
     toast(`Cargando ${files.length} archivo(s) en ${which}...`,'info');
     for(const f of files){
       try{
-        const rows = await readOne(f);
-        if(rows && rows.length){
-          state.raw[which].push(...rows);
-          chips.appendChild(chip(f.name, rows.length,true));
-          if(!state.headers[which] && rows.length) state.headers[which] = Object.keys(rows[0]);
+        const out = await readOne(f);
+        if(out.rows && out.rows.length){
+          state.raw[which].push(...out.rows);
+          if(!state.headers[which] && out.headers?.length) state.headers[which]=out.headers;
+          chips.appendChild(chip(f.name, out.rows.length, true));
         }else{
-          chips.appendChild(chip(f.name, 0,false));
+          chips.appendChild(chip(f.name, 0, false));
+          toast(`Sin filas útiles en ${f.name}`,'warn',2600);
         }
       }catch(e){
         console.error(e);
         chips.appendChild(chip(f.name, null,false));
-        toast(`Error leyendo ${f.name}`,'err',2600);
+        toast((e&&e.message)?e.message:`Error leyendo ${f.name}`,'err',3200);
       }
     }
-    toast(`Listo ${which}: ${state.raw[which].length} filas acumuladas`,'ok');
-    // Autodetect granular Decidir
+    // detectar Decidir granular
     if(which==='DEC'){
       const h = (state.headers.DEC||[]).map(norm);
       state.decidirGranular = h.includes('order') || h.includes('numero de orden');
@@ -263,25 +315,26 @@ document.querySelectorAll('.drop').forEach(zone=>{
     autoMountMaps();
     enableActions();
     refreshKPIs();
+    toast(`Listo ${which}: ${state.raw[which].length} filas acumuladas`,'ok');
   }
 
   choose.addEventListener('click',()=>input.click());
   input.addEventListener('change',e=> e.target.files && handleFiles([...e.target.files]));
   zone.addEventListener('dragover',e=>{ e.preventDefault(); zone.classList.add('drag'); });
-  zone.addEventListener('dragleave',e=>{ zone.classList.remove('drag'); });
+  zone.addEventListener('dragleave',()=> zone.classList.remove('drag'));
   zone.addEventListener('drop',e=>{
     e.preventDefault();
     const files=[...e.dataTransfer.files].filter(f=>/\.(xlsx|xls|csv)$/i.test(f.name));
     handleFiles(files);
   });
-});
+}
+document.querySelectorAll('.drop').forEach(wireDropZone);
 
 /* ======= Mapping UI ======= */
 function mountMap(containerId, which, expect, heuristics){
   const box = document.getElementById(containerId);
   box.innerHTML='';
   const headers = state.headers[which] || [];
-  const hnorm = headers.map(h=>({raw:h, n:norm(h)}));
   function findHeur(key){
     const fn = heuristics[key];
     const hit = headers.find(h=> fn(norm(h)));
@@ -367,37 +420,21 @@ function autoMountMaps(){
   );
 }
 
-/* ======= Build & Export (misma lógica que te gustó, con mejoras) ======= */
-const OUT_COLS = [
-  'Fechas Liquidacion','Numero de orden','Order','Tipo de Comprobante','Fecha de Comprobante',
-  'Importe Producto','Descuentos','Envio','Importe Total','Comisión (%)','Importe Comisión (AR$)',
-  'Cantidad Total de Cuotas','Costo Financiero (%)','Costo Financiero (AR$) asumido por el seller',
-  'Intereses asumidos por el cliente','Total sin impuestos','Seller'
-];
-
-function nnum(v){
-  if(typeof v==='number') return isNaN(v)?0:v;
-  if(typeof v==='string'){ const x=v.replace(/\./g,'').replace(/,/g,'.').replace(/[^0-9.-]/g,''); const n=parseFloat(x); return isNaN(n)?0:n; }
-  return 0;
-}
-function isBSF(issuer){ const s=norm(issuer); return s.includes('bsf')||s.includes('banco de servicios financieros'); }
-
+/* ======= Lookups (Tasas y Comisiones) ======= */
 function getMap(which,key){ return (state.map[which]||{})[key]||null; }
-
 function tasaLookup(tasRows){
-  const mCuotas = getMap('TAS','Cuotas'), mCon=getMap('TAS','TD% Con BSF'), mSin=getMap('TAS','TD% Sin BSF');
+  const mC=getMap('TAS','Cuotas'), mCon=getMap('TAS','TD% Con BSF'), mSin=getMap('TAS','TD% Sin BSF');
   const idx={};
   tasRows.forEach(r=>{
-    const c = nnum(r[mCuotas]);
-    idx[c] = {con:nnum(r[mCon]), sin:nnum(r[mSin])};
+    const c = nnum(r[mC]);
+    if(Number.isFinite(c)) idx[c] = {con:nnum(r[mCon]), sin:nnum(r[mSin])};
   });
   return (cuotas, bsf)=> (idx[cuotas]||idx[parseInt(cuotas)||0]||{con:0,sin:0})[bsf?'con':'sin']||0;
 }
-
 function comLookup(comRows){
-  const mSeller=getMap('COM','Seller'), mEm=getMap('COM','Emisor/Brand'), mCuo=getMap('COM','Cuotas'), mPct=getMap('COM','Comisión (%)');
+  const mS=getMap('COM','Seller'), mE=getMap('COM','Emisor/Brand'), mQ=getMap('COM','Cuotas'), mP=getMap('COM','Comisión (%)');
   const t=[];
-  comRows.forEach(r=> t.push({seller:norm(r[mSeller]), em:norm(r[mEm]||''), cuo: r[mCuo]!=null? String(r[mCuo]).trim():null, pct:nnum(r[mPct])}));
+  comRows.forEach(r=> t.push({seller:norm(r[mS]), em:norm(r[mE]||''), cuo: r[mQ]!=null? String(r[mQ]).trim():null, pct:nnum(r[mP])}));
   return (seller, emisor, cuotas)=>{
     const s=norm(seller), e=norm(emisor), c= cuotas!=null? String(cuotas).trim():null;
     let row=t.find(x=>x.seller===s && x.em===e && x.cuo===c);
@@ -408,6 +445,13 @@ function comLookup(comRows){
   };
 }
 
+/* ======= Build ======= */
+const OUT_COLS = [
+  'Fechas Liquidacion','Numero de orden','Order','Tipo de Comprobante','Fecha de Comprobante',
+  'Importe Producto','Descuentos','Envio','Importe Total','Comisión (%)','Importe Comisión (AR$)',
+  'Cantidad Total de Cuotas','Costo Financiero (%)','Costo Financiero (AR$) asumido por el seller',
+  'Intereses asumidos por el cliente','Total sin impuestos','Seller'
+];
 function build(){
   state.log = [];
   const VTEX=state.raw.VTEX, DEV=state.raw.DEV, COM=state.raw.COM, TAS=state.raw.TAS, DEC=state.raw.DEC;
@@ -415,22 +459,20 @@ function build(){
   const mesLabel = $('#mes').value||$('#periodo').value||'';
   const autoBSF = $('#detectarBSF').value==='si';
 
+  // index devoluciones
   const devByOrder={};
   if(DEV.length){
     DEV.forEach(r=>{
       const order = (r[m('DEV','Order')]||r[m('DEV','Numero de orden')]||'').toString().trim();
       if(!order) return;
-      devByOrder[order] = devByOrder[order] || {prod:0,desc:0,env:0,tot:0};
-      devByOrder[order].prod += nnum(r[m('DEV','Importe Producto')]);
-      devByOrder[order].desc += nnum(r[m('DEV','Descuentos')]);
-      devByOrder[order].env  += nnum(r[m('DEV','Envio')]);
-      devByOrder[order].tot  += nnum(r[m('DEV','Importe Total')]);
+      devByOrder[order] = devByOrder[order] || {tot:0};
+      devByOrder[order].tot += nnum(r[m('DEV','Importe Total')]);
     });
   }
 
+  // Decidir granular/resumen
   const decidirByOrder={}, decidirResumen={};
   if(DEC.length){
-    // detectar granular real por presencia de order en los datos cargados
     const hasOrder = !!(m('DEC','Order')||m('DEC','Numero de orden'));
     state.decidirGranular = hasOrder;
     if(hasOrder){
@@ -487,7 +529,6 @@ function build(){
     }
 
     const bsf = autoBSF ? isBSF(emisor) : false;
-
     const pctCom = comFn(seller, emisor, cuotas);
     const impCom = total * (pctCom||0);
 
@@ -504,7 +545,7 @@ function build(){
     const totalSin = total - impCom - impCF;
 
     const row = {
-      'Fechas Liquidacion': $('#mes').value || $('#periodo').value || '',
+      'Fechas Liquidacion': mesLabel,
       'Numero de orden': numeroOrden || order,
       'Order': order,
       'Tipo de Comprobante': tipo,
@@ -524,7 +565,7 @@ function build(){
     };
     out.push(row);
 
-    const key = norm(seller)+'||'+norm($('#mes').value||'');
+    const key = norm(seller)+'||'+norm(mesLabel||'');
     sumBySellerMes[key] = sumBySellerMes[key] || {total:0, idx:[]};
     sumBySellerMes[key].total += total;
     sumBySellerMes[key].idx.push(out.length-1);
@@ -553,6 +594,7 @@ function build(){
   state.out = out;
 }
 
+/* ======= Export ======= */
 function exportNow(){
   const fmt = $('#fmt').value || 'xlsx';
   const rows = state.out.map(r=>{ const o={}; OUT_COLS.forEach(k=>o[k]=(r[k]!==undefined?r[k]:null)); return o; });
@@ -573,6 +615,7 @@ function exportNow(){
   }
 }
 
+/* ======= KPIs ======= */
 function refreshKPIs(){
   const k=[];
   k.push(`VTEX: ${state.raw.VTEX.length} filas`);
@@ -583,34 +626,30 @@ function refreshKPIs(){
   setKPI(k);
 }
 
-/* ======= Buttons ======= */
-$('#btnAnalizar').addEventListener('click', ()=>{
+/* ======= Botones ======= */
+document.getElementById('btnAnalizar').addEventListener('click', ()=>{
   if(!state.raw.VTEX.length){ toast('Falta Base VTEX','err'); return; }
   build();
-  $('#btnDescargar').disabled = true;
-  $('#btnLog').disabled = false;
-  $('#logpre').textContent = state.log.join('\n');
+  document.getElementById('btnDescargar').disabled = true;
+  document.getElementById('btnLog').disabled = false;
+  document.getElementById('logpre').textContent = state.log.join('\n');
   toast(`Órdenes procesadas: ${state.out.length}`,'ok');
 });
-
-$('#btnGenerar').addEventListener('click', ()=>{
+document.getElementById('btnGenerar').addEventListener('click', ()=>{
   if(!state.raw.VTEX.length){ toast('Falta Base VTEX','err'); return; }
-  build();
-  exportNow();
-  $('#btnDescargar').disabled = false;
-  $('#btnLog').disabled = false;
-  $('#logpre').textContent = state.log.join('\n');
+  build(); exportNow();
+  document.getElementById('btnDescargar').disabled = false;
+  document.getElementById('btnLog').disabled = false;
+  document.getElementById('logpre').textContent = state.log.join('\n');
   toast('Archivo listo para descargar','ok');
 });
-
-$('#btnDescargar').addEventListener('click', ()=>{
+document.getElementById('btnDescargar').addEventListener('click', ()=>{
   if(!state.blob){ toast('Generá el archivo primero','err'); return; }
-  const period = ($('#periodo').value||'periodo').replace(/\s+/g,'_');
-  const fmt = $('#fmt').value||'xlsx';
+  const period = (document.getElementById('periodo').value||'periodo').replace(/\s+/g,'_');
+  const fmt = document.getElementById('fmt').value||'xlsx';
   saveAs(state.blob, `LIQUIDACION_MKP_${period}.${fmt}`);
 });
-
-$('#btnLog').addEventListener('click', ()=>{
+document.getElementById('btnLog').addEventListener('click', ()=>{
   const csv = 'event\n' + (state.log||[]).map(x=> `"${String(x).replace(/"/g,'""')}"`).join('\n');
   const blob = new Blob([csv],{type:'text/csv;charset=utf-8'});
   saveAs(blob, 'log_transformaciones.csv');
