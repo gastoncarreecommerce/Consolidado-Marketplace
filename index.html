@@ -3,626 +3,623 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>LIQUIDACION MKP – Consolidado Sellers</title>
+<title>LIQUIDACION MKP – Consolidador</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" />
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 <style>
   :root{
-    --bg:#0c1018; --card:#121827; --muted:#93a1b1; --text:#e6eaf2; --brand:#22d3ee; --brand2:#6366f1; --ok:#10b981; --warn:#f59e0b; --err:#ef4444;
+    --bg:#0b0f16; --panel:#111827; --panel2:#0f1626;
+    --text:#e5e7eb; --muted:#9aa4b2;
+    --line:rgba(255,255,255,.08);
+    --brand:#22d3ee; --brand2:#6366f1;
+    --ok:#10b981; --warn:#f59e0b; --err:#ef4444; --info:#60a5fa;
   }
-  *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(1200px 600px at 10% -10%,#0f162a 0%,transparent 60%),linear-gradient(180deg,#0b1220,#0c1018);color:var(--text)}
-  .wrap{max-width:1200px;margin:28px auto;padding:0 20px}
-  header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}
-  h1{font-size:22px;margin:0;font-weight:700;letter-spacing:.2px}
-  .badge{padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,var(--brand),var(--brand2));color:#081018;font-weight:700}
-  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
-  .card{grid-column:span 12;background:linear-gradient(180deg,#121827,#0e1422);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px;box-shadow:0 0 0 1px rgba(99,102,241,.08) inset}
-  @media(min-width:960px){.card.half{grid-column:span 6}}
-  .card h2{margin:0 0 10px 0;font-size:16px}
-  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-  .file{display:flex;align-items:center;gap:10px;padding:10px;border:1px dashed rgba(255,255,255,.2);border-radius:10px;background:#0c1324}
-  .file input{display:none}
-  .file label{cursor:pointer;background:linear-gradient(90deg,var(--brand),var(--brand2));color:#081018;font-weight:700;padding:8px 12px;border-radius:10px}
-  .hint{font-size:12px;color:var(--muted)}
-  select,button,input[type="text"],input[type="number"],.pill{
-    background:#0b1222;color:var(--text);border:1px solid rgba(255,255,255,.12);
-    border-radius:10px;padding:8px 10px;outline:none
-  }
-  button.primary{background:linear-gradient(90deg,var(--brand),var(--brand2));color:#061018;border:none;font-weight:800}
-  button.ghost{background:#0b1222;border:1px solid rgba(255,255,255,.16)}
-  .map-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-  .map-item{display:flex;flex-direction:column;gap:6px}
-  .kpi{display:flex;gap:16px;flex-wrap:wrap}
-  .kpi .item{background:#0b1222;border:1px solid rgba(255,255,255,.1);padding:10px 12px;border-radius:10px}
-  .ok{color:var(--ok)} .warn{color:var(--warn)} .err{color:var(--err)}
-  details{background:#0b1222;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:
+    radial-gradient(1200px 600px at 0% -20%,#0f162a 0%,transparent 60%),
+    linear-gradient(180deg,#0b1220,#0b0f16);color:var(--text)}
+  .wrap{max-width:1100px;margin:28px auto;padding:0 18px}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  h1{margin:0;font-size:22px;font-weight:800;letter-spacing:.2px}
+  .sub{color:var(--muted);font-size:13px;margin-top:6px}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+  .card{grid-column:span 12;background:
+    linear-gradient(180deg,var(--panel),var(--panel2));
+    border:1px solid var(--line);border-radius:14px;padding:14px}
+  @media(min-width:960px){.half{grid-column:span 6}}
+  .title{display:flex;align-items:center;gap:10px;margin:0 0 10px 0;font-size:15px}
+  .hint{color:var(--muted);font-size:12px}
+  .btn{appearance:none;border:1px solid var(--line);background:#0c1424;color:var(--text);
+       padding:10px 12px;border-radius:12px;cursor:pointer;font-weight:700}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  .btn.primary{border:none;background:linear-gradient(90deg,var(--brand),var(--brand2));color:#061018}
+  .btn.ghost{background:#0c1424}
+  .inputs{display:flex;flex-wrap:wrap;gap:10px}
+  .drop{position:relative;display:flex;flex-direction:column;gap:8px;align-items:flex-start;
+        padding:12px;border:1px dashed var(--line);border-radius:12px;background:#0b1222;min-height:92px}
+  .drop.drag{outline:2px dashed var(--brand);outline-offset:-4px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{display:flex;align-items:center;gap:6px;background:#0d172a;border:1px solid var(--line);
+        padding:6px 8px;border-radius:999px;font-size:12px}
+  .chip .dot{width:8px;height:8px;border-radius:50%}
+  .dot.ok{background:var(--ok)} .dot.err{background:var(--err)} .dot.info{background:var(--info)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  select,input{background:#0b1222;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+  details{background:#0b1222;border:1px solid var(--line);border-radius:12px;padding:10px}
   details>summary{cursor:pointer;font-weight:700;margin:-10px;padding:10px}
-  .footer{margin-top:18px;font-size:12px;color:var(--muted)}
+  .map{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .map .item{display:flex;flex-direction:column;gap:6px}
+  .kpi{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+  .kpi .item{background:#0b1222;border:1px solid var(--line);padding:8px 10px;border-radius:10px;font-size:12px}
   .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .toastbox{position:fixed;top:12px;right:12px;display:flex;flex-direction:column;gap:8px;z-index:50}
+  .toast{background:#0b1222;border:1px solid var(--line);padding:10px 12px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  .toast.ok{border-color:rgba(16,185,129,.35)}
+  .toast.err{border-color:rgba(239,68,68,.35)}
+  .toast.info{border-color:rgba(96,165,250,.35)}
+  pre{white-space:pre-wrap;word-wrap:break-word}
+  .footer{color:var(--muted);font-size:12px;margin-top:10px}
 </style>
 </head>
 <body>
+<div class="toastbox" id="toasts"></div>
 <div class="wrap">
   <header>
-    <h1>LIQUIDACION MKP – Consolidado Sellers</h1>
-    <div class="badge">Vercel Ready</div>
+    <div>
+      <h1>LIQUIDACION MKP – Consolidador</h1>
+      <div class="sub">Subí tus archivos, revisá el resumen y exportá el Excel con la hoja <b>LIQUIDACION</b>.</div>
+    </div>
   </header>
 
   <div class="grid">
     <div class="card half">
-      <h2>1) Archivos de entrada</h2>
-      <div class="row">
-        <div class="file"><label for="fVTEX">Subir Base VTEX</label><input id="fVTEX" type="file" accept=".xlsx,.xls,.csv" /></div>
-        <div class="file"><label for="fDEV">Subir Devoluciones</label><input id="fDEV" type="file" accept=".xlsx,.xls,.csv" /></div>
-        <div class="file"><label for="fCOM">Subir Comisiones</label><input id="fCOM" type="file" accept=".xlsx,.xls,.csv" /></div>
-        <div class="file"><label for="fTAS">Subir Tasas</label><input id="fTAS" type="file" accept=".xlsx,.xls,.csv" /></div>
-        <div class="file"><label for="fDEC">Subir Decidir / Gateway</label><input id="fDEC" type="file" accept=".xlsx,.xls,.csv" /></div>
+      <h3 class="title">Archivos</h3>
+      <div class="inputs">
+        <div class="drop" data-which="VTEX">
+          <div><b>Base VTEX</b> <span class="hint">(.xlsx/.xls/.csv — admite múltiples)</span></div>
+          <input type="file" multiple hidden accept=".xlsx,.xls,.csv" />
+          <div class="row">
+            <button class="btn choose">Elegir</button>
+            <span class="hint">o arrastrá y soltá acá</span>
+          </div>
+          <div class="chips"></div>
+        </div>
+        <div class="drop" data-which="DEV">
+          <div><b>Devoluciones</b> <span class="hint">opcional — múltiples</span></div>
+          <input type="file" multiple hidden accept=".xlsx,.xls,.csv" />
+          <div class="row"><button class="btn choose">Elegir</button><span class="hint">drag & drop</span></div>
+          <div class="chips"></div>
+        </div>
+        <div class="drop" data-which="COM">
+          <div><b>Comisiones</b></div>
+          <input type="file" multiple hidden accept=".xlsx,.xls,.csv" />
+          <div class="row"><button class="btn choose">Elegir</button></div>
+          <div class="chips"></div>
+        </div>
+        <div class="drop" data-which="TAS">
+          <div><b>Tasas</b></div>
+          <input type="file" multiple hidden accept=".xlsx,.xls,.csv" />
+          <div class="row"><button class="btn choose">Elegir</button></div>
+          <div class="chips"></div>
+        </div>
+        <div class="drop" data-which="DEC">
+          <div><b>Decidir / Gateway</b> <span class="hint">granular o resumen</span></div>
+          <input type="file" multiple hidden accept=".xlsx,.xls,.csv" />
+          <div class="row"><button class="btn choose">Elegir</button></div>
+          <div class="chips"></div>
+        </div>
       </div>
-      <div class="hint">Acepta XLSX/XLS/CSV. Si Decidir no trae órdenes, igual se prorratea por seller+mes.</div>
+      <div class="hint" style="margin-top:8px">Feedback inmediato: verás chips con nombre y filas leídas.</div>
     </div>
 
     <div class="card half">
-      <h2>2) Parámetros</h2>
+      <h3 class="title">Parámetros</h3>
       <div class="row">
-        <div class="pill">Periodo: <input id="periodoLabel" class="mono" value="16 Sep al 15 Oct" /></div>
-        <div class="pill">Mes de liquidación (texto): <input id="mesLabel" class="mono" value="Septiembre" /></div>
-        <div class="pill">Detectar BSF por Decidir (BIN/Issuer): 
-          <select id="detectarBSF"><option value="si" selected>Sí</option><option value="no">No</option></select>
+        <div>Periodo: <input id="periodo" class="mono" value="16 Sep al 15 Oct" /></div>
+        <div>Mes label (columna <i>Fechas Liquidacion</i>): <input id="mes" class="mono" value="Septiembre" /></div>
+        <div>Detectar BSF por Decidir:
+          <select id="detectarBSF">
+            <option value="si" selected>Sí</option>
+            <option value="no">No</option>
+          </select>
         </div>
-        <div class="pill">Formato salida:
+        <div>Salida:
           <select id="fmt"><option value="xlsx" selected>XLSX</option><option value="csv">CSV</option></select>
         </div>
       </div>
-      <div class="hint">“Periodo” y “Mes de liquidación” se vuelcan en la columna <b>Fechas Liquidacion</b> y para etiquetas.</div>
-    </div>
-
-    <div class="card">
-      <h2>3) Mapeo de columnas (opcional / recomendado)</h2>
-      <details>
-        <summary>Ver/editar mapeos</summary>
-        <div class="grid" style="margin-top:10px">
-          <div class="card half" id="mapVTEX">
-            <h3>VTEX</h3>
-            <div class="map-grid" id="mapVTEXGrid"></div>
-          </div>
-          <div class="card half" id="mapDEV">
-            <h3>Devoluciones</h3>
-            <div class="map-grid" id="mapDEVGrid"></div>
-          </div>
-          <div class="card half" id="mapCOM">
-            <h3>Comisiones</h3>
-            <div class="map-grid" id="mapCOMGrid"></div>
-            <div class="hint">Esperado: Seller, Emisor/Brand (BSF/Otro/Visa/Master), Cuotas (opcional), Comisión %</div>
-          </div>
-          <div class="card half" id="mapTAS">
-            <h3>Tasas</h3>
-            <div class="map-grid" id="mapTASGrid"></div>
-            <div class="hint">Esperado: Cuotas, TD% Con BSF, TD% Sin BSF</div>
-          </div>
-          <div class="card half" id="mapDEC">
-            <h3>Decidir / Gateway</h3>
-            <div class="map-grid" id="mapDECGrid"></div>
-            <div class="hint">Si no trae <i>Order</i>, se toma como resumen por Seller/Mes y se prorratea CF/Intereses.</div>
-          </div>
-        </div>
-      </details>
-    </div>
-
-    <div class="card">
-      <h2>4) Procesar</h2>
-      <div class="row">
-        <button class="ghost" id="btnAnalizar">Analizar & Validar</button>
-        <button class="primary" id="btnGenerar">Generar LIQUIDACION</button>
-      </div>
       <div class="kpi" id="kpi"></div>
-      <details id="logbox" style="margin-top:12px">
-        <summary>Log de transformaciones (CSV)</summary>
-        <div class="row" style="margin:8px 0">
-          <button class="ghost" id="btnLog">Descargar Log</button>
+    </div>
+
+    <div class="card">
+      <h3 class="title">Mapeo (si querés ajustarlo)</h3>
+      <details>
+        <summary>Abrir mapeo</summary>
+        <div class="grid" style="margin-top:8px">
+          <div class="card half">
+            <h4>VTEX</h4><div class="map" id="mapVTEX"></div>
+          </div>
+          <div class="card half">
+            <h4>Devoluciones</h4><div class="map" id="mapDEV"></div>
+          </div>
+          <div class="card half">
+            <h4>Comisiones</h4><div class="map" id="mapCOM"></div>
+            <div class="hint">Seller, Emisor/Brand (BSF/Otro/Visa/Master), Cuotas (opcional), Comisión (%)</div>
+          </div>
+          <div class="card half">
+            <h4>Tasas</h4><div class="map" id="mapTAS"></div>
+            <div class="hint">Cuotas, TD% Con BSF, TD% Sin BSF</div>
+          </div>
+          <div class="card half">
+            <h4>Decidir</h4><div class="map" id="mapDEC"></div>
+            <div class="hint">Si no trae “Order”, se toma como resumen por Seller/Mes y se prorratea</div>
+          </div>
         </div>
-        <div style="max-height:220px;overflow:auto;font-size:12px" id="logpre" class="mono"></div>
       </details>
     </div>
 
     <div class="card">
-      <h2>5) Resultado</h2>
+      <h3 class="title">Acciones</h3>
       <div class="row">
-        <button id="btnDescargar" class="primary" disabled>Descargar Archivo</button>
+        <button class="btn" id="btnAnalizar" disabled>Analizar</button>
+        <button class="btn primary" id="btnGenerar" disabled>Procesar y generar</button>
+        <button class="btn" id="btnDescargar" disabled>Descargar archivo</button>
+        <button class="btn ghost" id="btnLog" disabled>Descargar Log</button>
       </div>
-      <div class="footer">Estructura de salida: hoja <b>LIQUIDACION</b> con columnas exactas requeridas.</div>
+      <details style="margin-top:10px">
+        <summary>Ver log</summary>
+        <pre id="logpre" class="mono hint"></pre>
+      </details>
+      <div class="footer">Output con hoja <b>LIQUIDACION</b> y columnas exactas del formato final.</div>
     </div>
   </div>
 </div>
 
 <script>
-/** Utils **/
-const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
-const inferHeaders = (arr)=> arr.length ? Object.keys(arr[0]||{}) : [];
-const normalizeHeader = s => (s||"").toString().trim().toLowerCase()
-  .replace(/\s+/g,' ').replace(/[._-]/g,' ').replace(/\s+/g,' ').trim();
-const asNumber = (v)=> {
-  if (typeof v === 'number' && !isNaN(v)) return v;
-  if (typeof v === 'string') {
-    const x = v.replace(/\./g,'').replace(/,/g,'.').replace(/[^0-9.-]/g,'');
-    const n = parseFloat(x);
-    return isNaN(n)?0:n;
-  }
-  if (v instanceof Date) return +v; // not used
-  return v? Number(v): 0;
-};
-const fmtPct = x => (x==null? '': (Math.round(x*10000)/100).toFixed(2)+'%');
-const isTruthy = v => v===true || v==='true' || v==='sí' || v==='si' || v==='1' || v===1;
+/* ======= UX helpers ======= */
+const $ = s=>document.querySelector(s);
+const toasts = $('#toasts');
+function toast(msg,type='info',ms=2000){
+  const t=document.createElement('div');
+  t.className='toast '+type; t.textContent=msg; toasts.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(-6px)'; }, ms);
+  setTimeout(()=>{ t.remove(); }, ms+280);
+}
+function chip(name, rows, ok=true){
+  const d=document.createElement('div'); d.className='chip';
+  const dot=document.createElement('span'); dot.className='dot '+(ok?'ok':'err'); d.appendChild(dot);
+  const txt=document.createElement('span'); txt.textContent=name+(rows!=null?` · ${rows} filas`:''); d.appendChild(txt);
+  return d;
+}
+function setKPI(lines){ const box=$("#kpi"); box.innerHTML=''; (lines||[]).forEach(x=>{ const d=document.createElement('div'); d.className='item'; d.textContent=x; box.appendChild(d); }); }
 
-/** Global state **/
+/* ======= Data state ======= */
 const state = {
-  raw:{VTEX:null, DEV:null, COM:null, TAS:null, DEC:null},
-  maps:{VTEX:{}, DEV:{}, COM:{}, TAS:{}, DEC:{}},
-  log:[],
-  outRows:[],
+  raw:{ VTEX:[], DEV:[], COM:[], TAS:[], DEC:[] },
+  headers:{}, // first headers seen
+  map:{VTEX:{}, DEV:{}, COM:{}, TAS:{}, DEC:{}},
+  decidirGranular:false,
+  out:[],
   blob:null,
-  isDecidirGranular:false
+  log:[]
 };
 
-const REQUIRED_OUTPUT_COLUMNS = [
+/* ======= File reading ======= */
+async function readOne(file){
+  const buf = await file.arrayBuffer();
+  const isCSV = /\.csv$/i.test(file.name);
+  if(isCSV){
+    const data = new TextDecoder().decode(new Uint8Array(buf));
+    const wb = XLSX.read(data,{type:'string'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    return XLSX.utils.sheet_to_json(ws,{defval:null});
+  }else{
+    const wb = XLSX.read(buf,{type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    return XLSX.utils.sheet_to_json(ws,{defval:null});
+  }
+}
+function norm(s){ return (s||'').toString().toLowerCase().replace(/\s+/g,' ').trim(); }
+
+/* ======= Dropzones ======= */
+document.querySelectorAll('.drop').forEach(zone=>{
+  const which = zone.dataset.which;
+  const input = zone.querySelector('input[type=file]');
+  const chips = zone.querySelector('.chips');
+  const choose = zone.querySelector('.choose');
+
+  function enableActions(){
+    // Mínimo: VTEX
+    const hasVTEX = state.raw.VTEX.length>0;
+    $('#btnAnalizar').disabled = !hasVTEX;
+    $('#btnGenerar').disabled = !hasVTEX;
+  }
+
+  async function handleFiles(files){
+    zone.classList.remove('drag');
+    toast(`Cargando ${files.length} archivo(s) en ${which}...`,'info');
+    for(const f of files){
+      try{
+        const rows = await readOne(f);
+        if(rows && rows.length){
+          state.raw[which].push(...rows);
+          chips.appendChild(chip(f.name, rows.length,true));
+          if(!state.headers[which] && rows.length) state.headers[which] = Object.keys(rows[0]);
+        }else{
+          chips.appendChild(chip(f.name, 0,false));
+        }
+      }catch(e){
+        console.error(e);
+        chips.appendChild(chip(f.name, null,false));
+        toast(`Error leyendo ${f.name}`,'err',2600);
+      }
+    }
+    toast(`Listo ${which}: ${state.raw[which].length} filas acumuladas`,'ok');
+    // Autodetect granular Decidir
+    if(which==='DEC'){
+      const h = (state.headers.DEC||[]).map(norm);
+      state.decidirGranular = h.includes('order') || h.includes('numero de orden');
+    }
+    autoMountMaps();
+    enableActions();
+    refreshKPIs();
+  }
+
+  choose.addEventListener('click',()=>input.click());
+  input.addEventListener('change',e=> e.target.files && handleFiles([...e.target.files]));
+  zone.addEventListener('dragover',e=>{ e.preventDefault(); zone.classList.add('drag'); });
+  zone.addEventListener('dragleave',e=>{ zone.classList.remove('drag'); });
+  zone.addEventListener('drop',e=>{
+    e.preventDefault();
+    const files=[...e.dataTransfer.files].filter(f=>/\.(xlsx|xls|csv)$/i.test(f.name));
+    handleFiles(files);
+  });
+});
+
+/* ======= Mapping UI ======= */
+function mountMap(containerId, which, expect, heuristics){
+  const box = document.getElementById(containerId);
+  box.innerHTML='';
+  const headers = state.headers[which] || [];
+  const hnorm = headers.map(h=>({raw:h, n:norm(h)}));
+  function findHeur(key){
+    const fn = heuristics[key];
+    const hit = headers.find(h=> fn(norm(h)));
+    return hit || '';
+  }
+  expect.forEach(key=>{
+    const item=document.createElement('div'); item.className='item';
+    const lab=document.createElement('label'); lab.textContent=key; lab.style.fontSize='12px'; lab.style.opacity=.9;
+    const sel=document.createElement('select'); sel.className='mono';
+    const opt0=document.createElement('option'); opt0.value=''; opt0.textContent='(no mapear)'; sel.appendChild(opt0);
+    headers.forEach(h=>{ const o=document.createElement('option'); o.value=h; o.textContent=h; sel.appendChild(o); });
+    const pre = state.map[which][key] || findHeur(key);
+    if(pre) sel.value = pre;
+    sel.onchange=()=> state.map[which][key]=sel.value;
+    item.appendChild(lab); item.appendChild(sel); box.appendChild(item);
+    if(pre) state.map[which][key]=pre;
+  });
+}
+function autoMountMaps(){
+  mountMap('mapVTEX','VTEX',
+    ['Numero de orden','Order','Tipo de Comprobante','Fecha de Comprobante','Importe Producto','Descuentos','Envio','Importe Total','Cantidad Total de Cuotas','Seller','Emisor','Intereses asumidos por el cliente'],
+    {
+      'Numero de orden': n=> n.includes('numero de orden'),
+      'Order': n=> n==='order' || n.includes('order'),
+      'Tipo de Comprobante': n=> n.includes('tipo de comprobante'),
+      'Fecha de Comprobante': n=> n.includes('fecha de comprobante'),
+      'Importe Producto': n=> n.includes('importe producto'),
+      'Descuentos': n=> n.includes('descuento'),
+      'Envio': n=> n==='envio' || n.includes('envío'),
+      'Importe Total': n=> n.includes('importe total'),
+      'Cantidad Total de Cuotas': n=> n.includes('cuota'),
+      'Seller': n=> n==='seller' || n.includes('seller'),
+      'Emisor': n=> n.includes('emisor') || n.includes('issuer') || n.includes('banco'),
+      'Intereses asumidos por el cliente': n=> n.includes('interes')||n.includes('interés')
+    }
+  );
+  mountMap('mapDEV','DEV',
+    ['Numero de orden','Order','Tipo de Comprobante','Fecha de Comprobante','Importe Producto','Descuentos','Envio','Importe Total','Cantidad Total de Cuotas','Seller'],
+    {
+      'Numero de orden': n=> n.includes('numero de orden'),
+      'Order': n=> n==='order' || n.includes('order'),
+      'Tipo de Comprobante': n=> n.includes('tipo de comprobante'),
+      'Fecha de Comprobante': n=> n.includes('fecha de comprobante'),
+      'Importe Producto': n=> n.includes('importe producto'),
+      'Descuentos': n=> n.includes('descuento'),
+      'Envio': n=> n==='envio' || n.includes('envío'),
+      'Importe Total': n=> n.includes('importe total'),
+      'Cantidad Total de Cuotas': n=> n.includes('cuota'),
+      'Seller': n=> n==='seller' || n.includes('seller')
+    }
+  );
+  mountMap('mapCOM','COM',
+    ['Seller','Emisor/Brand','Cuotas','Comisión (%)'],
+    {
+      'Seller': n=> n.includes('seller'),
+      'Emisor/Brand': n=> n.includes('emisor')||n.includes('brand')||n.includes('marca')||n.includes('banco'),
+      'Cuotas': n=> n.includes('cuota'),
+      'Comisión (%)': n=> n.includes('comisi')
+    }
+  );
+  mountMap('mapTAS','TAS',
+    ['Cuotas','TD% Con BSF','TD% Sin BSF'],
+    {
+      'Cuotas': n=> n.startsWith('cuota'),
+      'TD% Con BSF': n=> n.includes('con bsf')||n.includes('bsf'),
+      'TD% Sin BSF': n=> n.includes('sin bsf')||n.includes('no bsf')
+    }
+  );
+  mountMap('mapDEC','DEC',
+    ['Order','Numero de orden','Fecha','BIN/Issuer','Brand','Cuotas','CF AR$','Interes Cliente AR$','Seller','Mes'],
+    {
+      'Order': n=> n==='order' || n.includes('order'),
+      'Numero de orden': n=> n.includes('numero de orden'),
+      'Fecha': n=> n.startsWith('fecha'),
+      'BIN/Issuer': n=> n.includes('issuer')||n.includes('emisor')||n.includes('bin')||n.includes('banco'),
+      'Brand': n=> n.includes('brand')||n.includes('marca')||n.includes('tarjeta'),
+      'Cuotas': n=> n.includes('cuota'),
+      'CF AR$': n=> n.includes('cf')||n.includes('financ'),
+      'Interes Cliente AR$': n=> n.includes('interes')||n.includes('interés'),
+      'Seller': n=> n.includes('seller')||n.includes('comercio'),
+      'Mes': n=> n==='mes' || n.includes('periodo')
+    }
+  );
+}
+
+/* ======= Build & Export (misma lógica que te gustó, con mejoras) ======= */
+const OUT_COLS = [
   'Fechas Liquidacion','Numero de orden','Order','Tipo de Comprobante','Fecha de Comprobante',
   'Importe Producto','Descuentos','Envio','Importe Total','Comisión (%)','Importe Comisión (AR$)',
   'Cantidad Total de Cuotas','Costo Financiero (%)','Costo Financiero (AR$) asumido por el seller',
   'Intereses asumidos por el cliente','Total sin impuestos','Seller'
 ];
 
-/** File readers **/
-async function readFile(file){
-  const buf = await file.arrayBuffer();
-  const isCSV = /\.csv$/i.test(file.name);
-  if (isCSV){
-    const data = new TextDecoder().decode(new Uint8Array(buf));
-    const wb = XLSX.read(data,{type:'string'});
-    const sheet = wb.SheetNames[0];
-    return XLSX.utils.sheet_to_json(wb.Sheets[sheet],{defval:null});
-  } else {
-    const wb = XLSX.read(buf,{type:'array'});
-    const sheet = wb.SheetNames[0];
-    return XLSX.utils.sheet_to_json(wb.Sheets[sheet],{defval:null});
-  }
+function nnum(v){
+  if(typeof v==='number') return isNaN(v)?0:v;
+  if(typeof v==='string'){ const x=v.replace(/\./g,'').replace(/,/g,'.').replace(/[^0-9.-]/g,''); const n=parseFloat(x); return isNaN(n)?0:n; }
+  return 0;
 }
+function isBSF(issuer){ const s=norm(issuer); return s.includes('bsf')||s.includes('banco de servicios financieros'); }
 
-function mountMapUI(containerId, sampleHeaders, defaultMap){
-  const cont = document.getElementById(containerId+'Grid');
-  if(!cont) return;
-  cont.innerHTML = '';
-  const makeSelect = (name, candidates=[])=>{
-    const sel = document.createElement('select'); sel.className='mono';
-    const opt0 = document.createElement('option'); opt0.value=''; opt0.textContent='(no mapear)'; sel.appendChild(opt0);
-    candidates.forEach(h=>{
-      const o=document.createElement('option'); o.value=h; o.textContent=h; sel.appendChild(o);
-    });
-    if(defaultMap && defaultMap[name]){
-      const wanted = defaultMap[name];
-      const idx = candidates.find(h=> normalizeHeader(h)===normalizeHeader(wanted));
-      if(idx){ sel.value = candidates.find(h=> normalizeHeader(h)===normalizeHeader(wanted));}
-    }
-    return sel;
-  };
-  const addRow = (label, key, candidates)=>{
-    const box = document.createElement('div'); box.className='map-item';
-    const lab = document.createElement('label'); lab.textContent = label; lab.style.fontSize='12px'; lab.style.opacity=.9;
-    const sel = makeSelect(key, candidates);
-    sel.dataset.key = key;
-    box.appendChild(lab); box.appendChild(sel);
-    cont.appendChild(box);
-  };
+function getMap(which,key){ return (state.map[which]||{})[key]||null; }
 
-  // VTEX/DEV expected fields
-  if(containerId==='mapVTEX' || containerId==='mapDEV'){
-    const expect = ['Numero de orden','Order','Tipo de Comprobante','Fecha de Comprobante','Importe Producto','Descuentos','Envio','Importe Total','Cantidad Total de Cuotas','Seller','Emisor','Intereses asumidos por el cliente'];
-    // heuristics defaults
-    const heur = {};
-    sampleHeaders.forEach(h=>{
-      const n = normalizeHeader(h);
-      if(n.includes('numero de orden') || n==='numero de orden') heur['Numero de orden']=h;
-      if(n==='order' || n.includes('order')) heur['Order']=h;
-      if(n.includes('tipo de comprobante')) heur['Tipo de Comprobante']=h;
-      if(n.includes('fecha de comprobante')) heur['Fecha de Comprobante']=h;
-      if(n.includes('importe producto')) heur['Importe Producto']=h;
-      if(n==='descuentos' || n.includes('descuento')) heur['Descuentos']=h;
-      if(n==='envio' || n.includes('envío')) heur['Envio']=h;
-      if(n.includes('importe total')) heur['Importe Total']=h;
-      if(n.includes('cuotas')) heur['Cantidad Total de Cuotas']=h;
-      if(n==='seller' || n.includes('seller')) heur['Seller']=h;
-      if(n.includes('emisor')||n.includes('banco')||n.includes('issuer')) heur['Emisor']=h;
-      if(n.includes('interes')||n.includes('interés')) heur['Intereses asumidos por el cliente']=h;
-    });
-    expect.forEach(e => addRow(e,e, sampleHeaders));
-    // set defaults
-    [...cont.querySelectorAll('select')].forEach(sel=>{
-      const key = sel.dataset.key;
-      if(heur[key]) sel.value = heur[key];
-    });
-  }
-
-  // COM expected
-  if(containerId==='mapCOM'){
-    const expect = ['Seller','Emisor/Brand','Cuotas','Comisión (%)'];
-    expect.forEach(e=> addRow(e,e, sampleHeaders));
-  }
-  // TAS expected
-  if(containerId==='mapTAS'){
-    const expect = ['Cuotas','TD% Con BSF','TD% Sin BSF'];
-    // heuristic
-    const heur = {};
-    sampleHeaders.forEach(h=>{
-      const n=normalizeHeader(h);
-      if(n.startsWith('cuota')) heur['Cuotas']=h;
-      if(n.includes('con bsf')||n.includes('bsf')) heur['TD% Con BSF']=h;
-      if(n.includes('sin bsf')||n.includes('no bsf')) heur['TD% Sin BSF']=h;
-    });
-    expect.forEach(e=> addRow(e,e, sampleHeaders));
-    [...cont.querySelectorAll('select')].forEach(sel=>{
-      const key=sel.dataset.key; if(heur[key]) sel.value=heur[key];
-    });
-  }
-  // DEC expected
-  if(containerId==='mapDEC'){
-    const expect = ['Order','Numero de orden','Fecha','BIN/Issuer','Brand','Cuotas','CF AR$','Interes Cliente AR$','Seller','Mes'];
-    expect.forEach(e=> addRow(e,e, sampleHeaders));
-  }
-}
-
-function grabMap(containerId){
-  const grid = document.getElementById(containerId+'Grid');
-  const map = {};
-  if(!grid) return map;
-  grid.querySelectorAll('select').forEach(sel=>{
-    map[ sel.dataset.key ] = sel.value || null;
-  });
-  return map;
-}
-
-function setKPI(msgs){
-  const box = document.getElementById('kpi');
-  box.innerHTML = '';
-  msgs.forEach(m=>{
-    const d=document.createElement('div'); d.className='item';
-    d.textContent = m; box.appendChild(d);
-  });
-}
-
-function pushLog(line){ state.log.push(line); }
-function renderLogPreview(){
-  const pre = document.getElementById('logpre');
-  pre.textContent = state.log.join('\n');
-}
-
-/** Core loaders **/
-async function handleLoad(which, file){
-  const data = await readFile(file);
-  state.raw[which] = data;
-  const headers = inferHeaders(data);
-  // mount map uis:
-  if(which==='VTEX') mountMapUI('mapVTEX', headers);
-  if(which==='DEV')  mountMapUI('mapDEV', headers);
-  if(which==='COM')  mountMapUI('mapCOM', headers);
-  if(which==='TAS')  mountMapUI('mapTAS', headers);
-  if(which==='DEC')  {
-    mountMapUI('mapDEC', headers);
-    // granular detector
-    const names = headers.map(h=>normalizeHeader(h));
-    state.isDecidirGranular = names.includes('order') || names.includes('numero de orden');
-  }
-  setKPI([`Cargado ${which}: ${data.length} filas`, ...(which==='DEC'?[`Decidir: ${state.isDecidirGranular?'granular por orden':'resumen por seller/mes'}`]:[])]);
-}
-
-/** Lookups **/
-function buildTasaLookup(tasRows, map){
-  // expect: Cuotas, TD% Con BSF, TD% Sin BSF
-  const idx = {};
+function tasaLookup(tasRows){
+  const mCuotas = getMap('TAS','Cuotas'), mCon=getMap('TAS','TD% Con BSF'), mSin=getMap('TAS','TD% Sin BSF');
+  const idx={};
   tasRows.forEach(r=>{
-    const cuotas = asNumber(r[map['Cuotas']]);
-    const con = asNumber(r[map['TD% Con BSF']]);
-    const sin = asNumber(r[map['TD% Sin BSF']]);
-    if(!isNaN(cuotas)) idx[cuotas] = {con, sin};
+    const c = nnum(r[mCuotas]);
+    idx[c] = {con:nnum(r[mCon]), sin:nnum(r[mSin])};
   });
-  return (cuotas, isBSF)=> {
-    const row = idx[cuotas] || idx[parseInt(cuotas)||0] || {con:0, sin:0};
-    return isBSF ? row.con : row.sin;
-  };
+  return (cuotas, bsf)=> (idx[cuotas]||idx[parseInt(cuotas)||0]||{con:0,sin:0})[bsf?'con':'sin']||0;
 }
-function buildComisionLookup(comRows, map){
-  // expect: Seller, Emisor/Brand, (opcional) Cuotas, Comisión (%)
-  const table = [];
-  comRows.forEach(r=>{
-    table.push({
-      seller: (r[map['Seller']]||'').toString().trim().toLowerCase(),
-      emisor: (r[map['Emisor/Brand']]||'').toString().trim().toLowerCase(),
-      cuotas: r[map['Cuotas']]!=null ? String(r[map['Cuotas']]).trim() : null,
-      pct: asNumber(r[map['Comisión (%)']])
-    });
-  });
+
+function comLookup(comRows){
+  const mSeller=getMap('COM','Seller'), mEm=getMap('COM','Emisor/Brand'), mCuo=getMap('COM','Cuotas'), mPct=getMap('COM','Comisión (%)');
+  const t=[];
+  comRows.forEach(r=> t.push({seller:norm(r[mSeller]), em:norm(r[mEm]||''), cuo: r[mCuo]!=null? String(r[mCuo]).trim():null, pct:nnum(r[mPct])}));
   return (seller, emisor, cuotas)=>{
-    const s = (seller||'').toString().trim().toLowerCase();
-    const e = (emisor||'').toString().trim().toLowerCase();
-    const c = cuotas!=null ? String(cuotas).trim() : null;
-    // priority: seller+emisor+cuotas -> seller+emisor -> seller -> generic
-    let row = table.find(x=>x.seller===s && x.emisor===e && (x.cuotas===c));
-    if(!row) row = table.find(x=>x.seller===s && x.emisor===e && (x.cuotas==null));
-    if(!row) row = table.find(x=>x.seller===s && (x.emisor===''||x.emisor==='*'||x.emisor==='general'));
-    if(!row) row = table.find(x=> (x.seller===''||x.seller==='*'||x.seller==='general') && (x.emisor===''||x.emisor==='*'||x.emisor==='general'));
-    return row? row.pct : 0;
+    const s=norm(seller), e=norm(emisor), c= cuotas!=null? String(cuotas).trim():null;
+    let row=t.find(x=>x.seller===s && x.em===e && x.cuo===c);
+    if(!row) row=t.find(x=>x.seller===s && x.em===e && x.cuo==null);
+    if(!row) row=t.find(x=>x.seller===s && (x.em===''||x.em==='*'||x.em==='general'));
+    if(!row) row=t.find(x=> (x.seller===''||x.seller==='*'||x.seller==='general') && (x.em===''||x.em==='*'||x.em==='general'));
+    return row?row.pct:0;
   };
 }
 
-/** Decidir helpers **/
-function decideIsBSF(issuerText){
-  const s = (issuerText||'').toString().toLowerCase();
-  return s.includes('bsf') || s.includes('banco de servicios financieros');
-}
+function build(){
+  state.log = [];
+  const VTEX=state.raw.VTEX, DEV=state.raw.DEV, COM=state.raw.COM, TAS=state.raw.TAS, DEC=state.raw.DEC;
+  const m = (w,k)=> getMap(w,k);
+  const mesLabel = $('#mes').value||$('#periodo').value||'';
+  const autoBSF = $('#detectarBSF').value==='si';
 
-/** Builder **/
-function buildOutput(){
-  state.maps.VTEX = grabMap('mapVTEX');
-  state.maps.DEV  = grabMap('mapDEV');
-  state.maps.COM  = grabMap('mapCOM');
-  state.maps.TAS  = grabMap('mapTAS');
-  state.maps.DEC  = grabMap('mapDEC');
+  const devByOrder={};
+  if(DEV.length){
+    DEV.forEach(r=>{
+      const order = (r[m('DEV','Order')]||r[m('DEV','Numero de orden')]||'').toString().trim();
+      if(!order) return;
+      devByOrder[order] = devByOrder[order] || {prod:0,desc:0,env:0,tot:0};
+      devByOrder[order].prod += nnum(r[m('DEV','Importe Producto')]);
+      devByOrder[order].desc += nnum(r[m('DEV','Descuentos')]);
+      devByOrder[order].env  += nnum(r[m('DEV','Envio')]);
+      devByOrder[order].tot  += nnum(r[m('DEV','Importe Total')]);
+    });
+  }
 
-  const periodo = document.getElementById('periodoLabel').value || '';
-  const mesLabel = document.getElementById('mesLabel').value || '';
-  const autoBSF = isTruthy(document.getElementById('detectarBSF').value==='si');
-
-  const VTEX = state.raw.VTEX || [];
-  const DEV  = state.raw.DEV  || [];
-  const COM  = state.raw.COM  || [];
-  const TAS  = state.raw.TAS  || [];
-  const DEC  = state.raw.DEC  || [];
-
-  // Build lookups
-  const tasaFn = TAS.length ? buildTasaLookup(TAS, state.maps.TAS) : ()=>0;
-  const comiFn = COM.length ? buildComisionLookup(COM, state.maps.COM) : ()=>0;
-
-  // Index DEV (devoluciones) por Order
-  const devIdx = {};
-  DEV.forEach(r=>{
-    const order = (r[state.maps.DEV['Order']] || r[state.maps.DEV['Numero de orden']] || '').toString().trim();
-    if(!order) return;
-    if(!devIdx[order]) devIdx[order] = {producto:0, desc:0, envio:0, total:0};
-    devIdx[order].producto += asNumber(r[state.maps.DEV['Importe Producto']]);
-    devIdx[order].desc     += asNumber(r[state.maps.DEV['Descuentos']]);
-    devIdx[order].envio    += asNumber(r[state.maps.DEV['Envio']]);
-    devIdx[order].total    += asNumber(r[state.maps.DEV['Importe Total']]);
-  });
-
-  // Decidir granular index
-  const decidirByOrder = {};
-  const decidirResumenSellerMes = {};
+  const decidirByOrder={}, decidirResumen={};
   if(DEC.length){
-    if(state.isDecidirGranular){
+    // detectar granular real por presencia de order en los datos cargados
+    const hasOrder = !!(m('DEC','Order')||m('DEC','Numero de orden'));
+    state.decidirGranular = hasOrder;
+    if(hasOrder){
       DEC.forEach(r=>{
-        const order = (r[state.maps.DEC['Order']] || r[state.maps.DEC['Numero de orden']] || '').toString().trim();
+        const order=(r[m('DEC','Order')]||r[m('DEC','Numero de orden')]||'').toString().trim();
         if(!order) return;
         decidirByOrder[order] = {
-          issuer: r[state.maps.DEC['BIN/Issuer']] || r[state.maps.DEC['Brand']] || '',
-          brand:  r[state.maps.DEC['Brand']] || '',
-          cuotas: asNumber(r[state.maps.DEC['Cuotas']]),
-          cfArs:  asNumber(r[state.maps.DEC['CF AR$']]),
-          intCli: asNumber(r[state.maps.DEC['Interes Cliente AR$']]),
+          issuer:r[m('DEC','BIN/Issuer')]||r[m('DEC','Brand')]||'',
+          brand:r[m('DEC','Brand')]||'',
+          cuotas:nnum(r[m('DEC','Cuotas')]),
+          cf:nnum(r[m('DEC','CF AR$')]),
+          ic:nnum(r[m('DEC','Interes Cliente AR$')]),
         };
       });
-    } else {
-      // resumen por seller / mes
+    }else{
       DEC.forEach(r=>{
-        const seller = (r[state.maps.DEC['Seller']]||'').toString().trim().toLowerCase();
-        const mes    = (r[state.maps.DEC['Mes']]||mesLabel).toString().trim().toLowerCase();
-        const cfArs  = asNumber(r[state.maps.DEC['CF AR$']]);
-        const intCli = asNumber(r[state.maps.DEC['Interes Cliente AR$']]);
-        if(!seller) return;
-        const key = seller+'||'+mes;
-        if(!decidirResumenSellerMes[key]) decidirResumenSellerMes[key] = {cf:0, ic:0};
-        decidirResumenSellerMes[key].cf += cfArs;
-        decidirResumenSellerMes[key].ic += intCli;
+        const seller=norm(r[m('DEC','Seller')]||'');
+        const mes= norm(r[m('DEC','Mes')]||mesLabel);
+        const key=seller+'||'+mes;
+        decidirResumen[key] = decidirResumen[key]||{cf:0,ic:0};
+        decidirResumen[key].cf += nnum(r[m('DEC','CF AR$')]);
+        decidirResumen[key].ic += nnum(r[m('DEC','Interes Cliente AR$')]);
       });
     }
   }
 
-  // Sumarizar VTEX por orden y aplicar devoluciones
-  const out = [];
-  const sumBySellerMes = {}; // para prorrateo si Decidir es resumen
+  const tasaFn = TAS.length ? tasaLookup(TAS) : ()=>0;
+  const comFn  = COM.length ? comLookup(COM) : ()=>0;
+
+  const out=[], sumBySellerMes={};
   VTEX.forEach(r=>{
-    const numeroOrden = r[state.maps.VTEX['Numero de orden']];
-    const order       = (r[state.maps.VTEX['Order']] || numeroOrden || '').toString().trim();
+    const numeroOrden = r[m('VTEX','Numero de orden')];
+    const order = (r[m('VTEX','Order')]||numeroOrden||'').toString().trim();
     if(!order) return;
-    const tipoCbte    = r[state.maps.VTEX['Tipo de Comprobante']] || 'V';
-    const fechaCbte   = r[state.maps.VTEX['Fecha de Comprobante']] || '';
-    const prod        = asNumber(r[state.maps.VTEX['Importe Producto']]);
-    const desc        = asNumber(r[state.maps.VTEX['Descuentos']]);
-    const envio       = asNumber(r[state.maps.VTEX['Envio']]);
-    let total         = r[state.maps.VTEX['Importe Total']]!=null ? asNumber(r[state.maps.VTEX['Importe Total']]) : (prod - desc + envio);
-    let cuotas        = asNumber(r[state.maps.VTEX['Cantidad Total de Cuotas']]);
-    let seller        = (r[state.maps.VTEX['Seller']]||'').toString().trim();
-    let emisor        = r[state.maps.VTEX['Emisor']] || '';
+    const tipo = r[m('VTEX','Tipo de Comprobante')] || 'V';
+    const fecha = r[m('VTEX','Fecha de Comprobante')] || '';
+    const prod  = nnum(r[m('VTEX','Importe Producto')]);
+    const desc  = nnum(r[m('VTEX','Descuentos')]);
+    const envio = nnum(r[m('VTEX','Envio')]);
+    let total   = r[m('VTEX','Importe Total')]!=null? nnum(r[m('VTEX','Importe Total')]) : (prod - desc + envio);
+    let cuotas  = nnum(r[m('VTEX','Cantidad Total de Cuotas')]);
+    const seller= (r[m('VTEX','Seller')]||'').toString().trim();
+    let emisor  = r[m('VTEX','Emisor')] || '';
 
-    // aplicar devoluciones
-    if(devIdx[order]){
-      total -= devIdx[order].total;
-      pushLog(`DEV aplicado a ${order}: -${devIdx[order].total.toFixed(2)}`);
+    if(devByOrder[order]){
+      total -= devByOrder[order].tot;
+      state.log.push(`DEV ${order}: -${devByOrder[order].tot.toFixed(2)}`);
     }
 
-    // Decidir granular complementa
-    let decidir = decidirByOrder[order] || null;
-    if(decidir){
-      if(!cuotas && decidir.cuotas) cuotas = decidir.cuotas;
-      if(!emisor && decidir.issuer) emisor = decidir.issuer;
+    const dec = decidirByOrder[order];
+    if(dec){
+      if(!cuotas && dec.cuotas) cuotas = dec.cuotas;
+      if(!emisor && dec.issuer) emisor = dec.issuer;
     }
 
-    // determinar BSF
-    let isBSF = false;
-    if(autoBSF){
-      isBSF = decideIsBSF(emisor);
+    const bsf = autoBSF ? isBSF(emisor) : false;
+
+    const pctCom = comFn(seller, emisor, cuotas);
+    const impCom = total * (pctCom||0);
+
+    let pctCF = tasaFn(cuotas||0, bsf);
+    let impCF = total * (pctCF||0);
+
+    if(dec && dec.cf){
+      impCF = dec.cf;
+      pctCF = total? (impCF/total):0;
+      state.log.push(`DEC CF override ${order}: ${impCF.toFixed(2)} (${(pctCF*100).toFixed(2)}%)`);
     }
 
-    // comisión % por seller+emisor(+cuotas)
-    const pctCom = comiFn(seller, emisor, cuotas);
-    const impCom = total * (pctCom || 0);
-
-    // costo financiero
-    let pctCF = tasaFn(cuotas||0, isBSF);
-    let impCF = total * (pctCF || 0);
-
-    // si Decidir granular trae CF AR$, pisar
-    if(decidir && decidir.cfArs){
-      impCF = decidir.cfArs;
-      pctCF = total? (impCF/total) : 0;
-      pushLog(`Decidir CF granular pisa CF en ${order}: CF=${impCF.toFixed(2)} (${fmtPct(pctCF)})`);
-    }
-
-    // intereses cliente
-    let interesCli = decidir? decidir.intCli : 0;
-
-    const totalSinImpuestos = total - impCom - impCF;
+    const intCli = dec? dec.ic : 0;
+    const totalSin = total - impCom - impCF;
 
     const row = {
-      'Fechas Liquidacion': mesLabel || periodo || '',
+      'Fechas Liquidacion': $('#mes').value || $('#periodo').value || '',
       'Numero de orden': numeroOrden || order,
       'Order': order,
-      'Tipo de Comprobante': tipoCbte || 'V',
-      'Fecha de Comprobante': fechaCbte,
+      'Tipo de Comprobante': tipo,
+      'Fecha de Comprobante': fecha,
       'Importe Producto': prod,
       'Descuentos': desc,
       'Envio': envio,
       'Importe Total': total,
-      'Comisión (%)': pctCom || 0,
+      'Comisión (%)': pctCom||0,
       'Importe Comisión (AR$)': impCom,
-      'Cantidad Total de Cuotas': cuotas || 0,
-      'Costo Financiero (%)': pctCF || 0,
+      'Cantidad Total de Cuotas': cuotas||0,
+      'Costo Financiero (%)': pctCF||0,
       'Costo Financiero (AR$) asumido por el seller': impCF,
-      'Intereses asumidos por el cliente': interesCli || 0,
-      'Total sin impuestos': totalSinImpuestos,
+      'Intereses asumidos por el cliente': intCli||0,
+      'Total sin impuestos': totalSin,
       'Seller': seller
     };
     out.push(row);
 
-    // acumular para prorrateo (Decidir resumen)
-    const key = (seller||'').toString().trim().toLowerCase()+'||'+(mesLabel||'').toString().trim().toLowerCase();
-    if(!sumBySellerMes[key]) sumBySellerMes[key] = {totalVTEX:0, idx:[]};
-    sumBySellerMes[key].totalVTEX += total;
+    const key = norm(seller)+'||'+norm($('#mes').value||'');
+    sumBySellerMes[key] = sumBySellerMes[key] || {total:0, idx:[]};
+    sumBySellerMes[key].total += total;
     sumBySellerMes[key].idx.push(out.length-1);
   });
 
-  // prorrateo Decidir resumen por seller/mes
-  if(Object.keys(decidirResumenSellerMes).length){
-    Object.entries(decidirResumenSellerMes).forEach(([key,vals])=>{
-      const bucket = sumBySellerMes[key];
-      if(!bucket){ pushLog(`WARN: Decidir resumen ${key} sin matching en VTEX`); return; }
-      const base = bucket.totalVTEX || 0;
-      bucket.idx.forEach(i=>{
-        const row = out[i];
-        const w = base? (row['Importe Total']/base) : 0;
-        const addCF = vals.cf * w;
-        const addIC = vals.ic * w;
-
-        if(addCF){
-          const total = row['Importe Total'];
-          row['Costo Financiero (AR$) asumido por el seller'] += addCF;
-          const newPct = total? (row['Costo Financiero (AR$) asumido por el seller'] / total) : 0;
-          row['Costo Financiero (%)'] = newPct;
-        }
-        if(addIC){
-          row['Intereses asumidos por el cliente'] += addIC;
-        }
-        row['Total sin impuestos'] = row['Importe Total'] - row['Importe Comisión (AR$)'] - row['Costo Financiero (AR$) asumido por el seller'];
-      });
-      pushLog(`Decidir resumen aplicado ${key}: CF=${vals.cf.toFixed(2)} IC=${vals.ic.toFixed(2)} prorrateado en ${bucket.idx.length} órdenes`);
+  // prorrateo Decidir resumen
+  Object.entries(decidirResumen).forEach(([key,vals])=>{
+    const bucket = sumBySellerMes[key];
+    if(!bucket){ state.log.push(`WARN Decidir resumen sin match VTEX: ${key}`); return; }
+    const base = bucket.total || 0;
+    bucket.idx.forEach(i=>{
+      const row = out[i];
+      const w = base? row['Importe Total']/base : 0;
+      const addCF = vals.cf*w, addIC = vals.ic*w;
+      if(addCF){
+        row['Costo Financiero (AR$) asumido por el seller'] += addCF;
+        const newPct = row['Importe Total']? row['Costo Financiero (AR$) asumido por el seller']/row['Importe Total'] : 0;
+        row['Costo Financiero (%)'] = newPct;
+      }
+      if(addIC){ row['Intereses asumidos por el cliente'] += addIC; }
+      row['Total sin impuestos'] = row['Importe Total'] - row['Importe Comisión (AR$)'] - row['Costo Financiero (AR$) asumido por el seller'];
     });
-  }
-
-  state.outRows = out;
-}
-
-/** Export **/
-function exportFile(){
-  const fmt = document.getElementById('fmt').value || 'xlsx';
-  const rows = state.outRows.map(r=>{
-    // asegurar columnas y orden:
-    const o={}; REQUIRED_OUTPUT_COLUMNS.forEach(c=>{ o[c]= (r[c]!==undefined ? r[c] : null); });
-    return o;
+    state.log.push(`DEC resumen ${key}: CF=${vals.cf.toFixed(2)} IC=${vals.ic.toFixed(2)} prorrateado`);
   });
 
+  state.out = out;
+}
+
+function exportNow(){
+  const fmt = $('#fmt').value || 'xlsx';
+  const rows = state.out.map(r=>{ const o={}; OUT_COLS.forEach(k=>o[k]=(r[k]!==undefined?r[k]:null)); return o; });
   if(fmt==='csv'){
-    // simple CSV
-    const header = REQUIRED_OUTPUT_COLUMNS.join(',');
-    const body = rows.map(r=> REQUIRED_OUTPUT_COLUMNS.map(k=>{
-      const v = r[k];
-      if(typeof v === 'string'){
-        return `"${v.replace(/"/g,'""')}"`;
-      } else if(typeof v === 'number'){
-        return String(v);
-      } else return v==null?'':String(v);
+    const head = OUT_COLS.join(',');
+    const body = rows.map(r=> OUT_COLS.map(k=>{
+      const v=r[k];
+      if(typeof v==='string') return `"${v.replace(/"/g,'""')}"`;
+      if(typeof v==='number') return String(v);
+      return v==null?'':String(v);
     }).join(',')).join('\n');
-    const csv = header+'\n'+body;
-    const blob = new Blob([csv],{type:'text/csv;charset=utf-8'});
-    state.blob = blob;
-  } else {
-    // XLSX
-    // Formateo: mostrar % como número (dejamos crudo, el usuario puede formatear)
-    const ws = XLSX.utils.json_to_sheet(rows,{header:REQUIRED_OUTPUT_COLUMNS});
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'LIQUIDACION');
+    state.blob = new Blob([head+'\n'+body],{type:'text/csv;charset=utf-8'});
+  }else{
+    const ws = XLSX.utils.json_to_sheet(rows,{header:OUT_COLS});
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'LIQUIDACION');
     const out = XLSX.write(wb,{bookType:'xlsx',type:'array'});
     state.blob = new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
   }
-  document.getElementById('btnDescargar').disabled = false;
 }
 
-function downloadBlob(filename){
-  if(!state.blob) return;
-  saveAs(state.blob, filename);
+function refreshKPIs(){
+  const k=[];
+  k.push(`VTEX: ${state.raw.VTEX.length} filas`);
+  if(state.raw.DEV.length) k.push(`Devoluciones: ${state.raw.DEV.length}`);
+  if(state.raw.COM.length) k.push(`Comisiones: ${state.raw.COM.length}`);
+  if(state.raw.TAS.length) k.push(`Tasas: ${state.raw.TAS.length}`);
+  if(state.raw.DEC.length) k.push(`Decidir: ${state.raw.DEC.length} (${state.decidirGranular?'granular':'resumen'})`);
+  setKPI(k);
 }
 
-/** Events **/
-document.getElementById('fVTEX').addEventListener('change', e=> e.target.files[0] && handleLoad('VTEX', e.target.files[0]));
-document.getElementById('fDEV').addEventListener('change', e=> e.target.files[0] && handleLoad('DEV', e.target.files[0]));
-document.getElementById('fCOM').addEventListener('change', e=> e.target.files[0] && handleLoad('COM', e.target.files[0]));
-document.getElementById('fTAS').addEventListener('change', e=> e.target.files[0] && handleLoad('TAS', e.target.files[0]));
-document.getElementById('fDEC').addEventListener('change', e=> e.target.files[0] && handleLoad('DEC', e.target.files[0]));
-
-document.getElementById('btnAnalizar').addEventListener('click', async ()=>{
-  state.log = [];
-  const need = ['VTEX'];
-  const missing = need.filter(k=> !(state.raw[k] && state.raw[k].length));
-  if(missing.length){ alert('Falta subir: '+missing.join(', ')); return; }
-  buildOutput();
-  setKPI([
-    `Órdenes resultantes: ${state.outRows.length}`,
-    `Decidir: ${Object.keys(state.raw.DEC||{}).length? (state.isDecidirGranular?'granular':'resumen/prorrateo'): 'no cargado'}`,
-    `Comisiones: ${state.raw.COM? state.raw.COM.length:0} filas`,
-    `Tasas: ${state.raw.TAS? state.raw.TAS.length:0} filas`
-  ]);
-  renderLogPreview();
+/* ======= Buttons ======= */
+$('#btnAnalizar').addEventListener('click', ()=>{
+  if(!state.raw.VTEX.length){ toast('Falta Base VTEX','err'); return; }
+  build();
+  $('#btnDescargar').disabled = true;
+  $('#btnLog').disabled = false;
+  $('#logpre').textContent = state.log.join('\n');
+  toast(`Órdenes procesadas: ${state.out.length}`,'ok');
 });
 
-document.getElementById('btnGenerar').addEventListener('click', async ()=>{
-  state.log = [];
-  const need = ['VTEX'];
-  const missing = need.filter(k=> !(state.raw[k] && state.raw[k].length));
-  if(missing.length){ alert('Falta subir: '+missing.join(', ')); return; }
-  buildOutput();
-  exportFile();
-  renderLogPreview();
-  setKPI([`Archivo listo: ${state.outRows.length} filas`, 'Revisá el Log si querés auditar los ajustes.']);
+$('#btnGenerar').addEventListener('click', ()=>{
+  if(!state.raw.VTEX.length){ toast('Falta Base VTEX','err'); return; }
+  build();
+  exportNow();
+  $('#btnDescargar').disabled = false;
+  $('#btnLog').disabled = false;
+  $('#logpre').textContent = state.log.join('\n');
+  toast('Archivo listo para descargar','ok');
 });
 
-document.getElementById('btnDescargar').addEventListener('click', ()=>{
-  const fmt = document.getElementById('fmt').value || 'xlsx';
-  const periodo = (document.getElementById('periodoLabel').value||'').replace(/\s+/g,'_');
-  const name = `LIQUIDACION_MKP_${periodo}.${fmt}`;
-  downloadBlob(name);
+$('#btnDescargar').addEventListener('click', ()=>{
+  if(!state.blob){ toast('Generá el archivo primero','err'); return; }
+  const period = ($('#periodo').value||'periodo').replace(/\s+/g,'_');
+  const fmt = $('#fmt').value||'xlsx';
+  saveAs(state.blob, `LIQUIDACION_MKP_${period}.${fmt}`);
 });
 
-document.getElementById('btnLog').addEventListener('click', ()=>{
+$('#btnLog').addEventListener('click', ()=>{
   const csv = 'event\n' + (state.log||[]).map(x=> `"${String(x).replace(/"/g,'""')}"`).join('\n');
   const blob = new Blob([csv],{type:'text/csv;charset=utf-8'});
-  saveAs(blob,'log_transformaciones.csv');
+  saveAs(blob, 'log_transformaciones.csv');
 });
+
+/* ======= Init ======= */
+autoMountMaps();
+setKPI(['Esperando archivos…']);
+toast('Subí tus archivos para empezar','info',2400);
 </script>
 </body>
 </html>
