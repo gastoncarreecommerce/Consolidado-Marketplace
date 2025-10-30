@@ -4,9 +4,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>LIQUIDACION MKP – Consolidador</title>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" />
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.19.3/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 <style>
   :root{
     --bg:#0b0f16; --panel:#111827; --panel2:#0f1626;
@@ -79,10 +76,7 @@
         <div class="drop" data-which="VTEX">
           <div><b>Base VTEX</b> <span class="hint">(.xlsx/.xls/.csv — múltiples)</span></div>
           <input type="file" multiple hidden accept=".xlsx,.xls,.csv" />
-          <div class="row">
-            <button class="btn choose">Elegir</button>
-            <span class="hint">o arrastrá y soltá acá</span>
-          </div>
+          <div class="row"><button class="btn choose">Elegir</button><span class="hint">o arrastrá y soltá acá</span></div>
           <div class="chips"></div>
         </div>
         <div class="drop" data-which="DEV">
@@ -157,6 +151,33 @@
 </div>
 
 <script>
+/* ===== Loader robusto: SheetJS + FileSaver ===== */
+const CDN_XLSX = [
+  "https://cdn.jsdelivr.net/npm/xlsx@0.20.2/dist/xlsx.full.min.js",
+  "https://unpkg.com/xlsx@0.20.2/dist/xlsx.full.min.js",
+  "https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"
+];
+const CDN_FS = [
+  "https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js",
+  "https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"
+];
+
+function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error("Fallo al cargar: "+src)); document.head.appendChild(s); }); }
+async function ensureLibs(){
+  const toasts = document.getElementById('toasts');
+  const toast = (msg,type='info',ms=2200)=>{ const t=document.createElement('div'); t.className='toast '+type; t.textContent=msg; toasts.appendChild(t); setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(-6px)'; }, ms); setTimeout(()=>{ t.remove(); }, ms+280); };
+  if(!window.XLSX){
+    let loaded=false, lastErr=null;
+    for(const url of CDN_XLSX){ try{ await loadScript(url); loaded=true; break; } catch(e){ lastErr=e; } }
+    if(!loaded){ toast("No pude cargar XLSX (SheetJS). Reintentá o revisá el firewall/CDN.","err",5000); throw lastErr||new Error("XLSX no cargó"); }
+  }
+  if(!window.saveAs){
+    let loaded=false, lastErr=null;
+    for(const url of CDN_FS){ try{ await loadScript(url); loaded=true; break; } catch(e){ lastErr=e; } }
+    if(!loaded){ toast("No pude cargar FileSaver. El export podría fallar.","warn",5000); }
+  }
+}
+
 /* ======= UX helpers ======= */
 const $ = s=>document.querySelector(s);
 const toasts = document.getElementById('toasts');
@@ -174,10 +195,10 @@ function chip(name, rows, ok=true){
 }
 function setKPI(lines){ const box=$("#kpi"); box.innerHTML=''; (lines||[]).forEach(x=>{ const d=document.createElement('div'); d.className='item'; d.textContent=x; box.appendChild(d); }); }
 
-/* ======= Data state ======= */
+/* ======= Estado ======= */
 const state = {
   raw:{ VTEX:[], DEV:[], COM:[], TAS:[], DEC:[] },
-  headers:{}, // primeros headers detectados por tipo
+  headers:{},
   map:{VTEX:{}, DEV:{}, COM:{}, TAS:{}, DEC:{}},
   decidirGranular:false,
   out:[],
@@ -195,51 +216,30 @@ function nnum(v){
 }
 function isBSF(issuer){ const s=norm(issuer); return s.includes('bsf')||s.includes('banco de servicios financieros'); }
 
-/* ======= Excel/CSV Robust Reader ======= */
-/* Heurística: elegir la hoja con más datos “válidos”, detectar fila de encabezados
-   buscando la primera fila con ≥2 celdas que parezcan columna (texto no numérico),
-   luego usarla como header. */
-function isHeaderCell(v){ 
-  if(v==null) return false;
-  const s=String(v).trim();
-  if(!s) return false;
-  // Evitar que números puros cuenten como header
-  return isNaN(Number(s));
-}
+/* ======= Reader robusto ======= */
+function isHeaderCell(v){ if(v==null) return false; const s=String(v).trim(); if(!s) return false; return isNaN(Number(s)); }
 function detectHeaderRow(matrix,maxScan=30){
   for(let r=0; r<Math.min(matrix.length,maxScan); r++){
-    const row = matrix[r]||[];
-    const headerish = row.filter(c=>isHeaderCell(c)).length;
+    const row = matrix[r]||[]; const headerish = row.filter(c=>isHeaderCell(c)).length;
     if(headerish>=2) return r;
-  }
-  return 0; // fallback
+  } return 0;
 }
 function sheetToMatrix(ws){
-  const range = XLSX.utils.decode_range(ws['!ref']||'A1:A1');
-  const out=[];
+  const range = XLSX.utils.decode_range(ws['!ref']||'A1:A1'); const out=[];
   for(let R=range.s.r; R<=range.e.r; ++R){
-    const row=[];
-    for(let C=range.s.c; C<=range.e.c; ++C){
-      const addr = XLSX.utils.encode_cell({r:R,c:C});
-      const cell = ws[addr];
+    const row=[]; for(let C=range.s.c; C<=range.e.c; ++C){
+      const addr = XLSX.utils.encode_cell({r:R,c:C}); const cell = ws[addr];
       row.push(cell? cell.w ?? cell.v : null);
-    }
-    out.push(row);
-  }
-  return out;
+    } out.push(row);
+  } return out;
 }
 function jsonFromAnySheet(ws){
-  const mat = sheetToMatrix(ws);
-  if(!mat.length) return [];
+  const mat = sheetToMatrix(ws); if(!mat.length) return {rows:[],headers:[]};
   const hRow = detectHeaderRow(mat);
   const headers = (mat[hRow]||[]).map(v=> String(v??'').trim());
   const rows = [];
   for(let r=hRow+1; r<mat.length; r++){
-    const obj={};
-    for(let c=0; c<headers.length; c++){
-      obj[ headers[c] || `col_${c}` ] = mat[r][c] ?? null;
-    }
-    // descartar filas totalmente vacías
+    const obj={}; for(let c=0; c<headers.length; c++){ obj[ headers[c] || `col_${c}` ] = mat[r][c] ?? null; }
     if(Object.values(obj).some(v=> v!==null && String(v).trim()!=='')) rows.push(obj);
   }
   return {rows, headers};
@@ -248,8 +248,6 @@ async function readOne(file){
   try{
     const buf = await file.arrayBuffer();
     const isCSV = /\.csv$/i.test(file.name);
-
-    // CSV directo
     if(isCSV){
       const data = new TextDecoder().decode(new Uint8Array(buf));
       const wb = XLSX.read(data,{type:'string',raw:false,cellText:true,cellDates:true});
@@ -257,8 +255,6 @@ async function readOne(file){
       const json = XLSX.utils.sheet_to_json(ws,{defval:null});
       return {rows:json, headers: Object.keys(json[0]||{})};
     }
-
-    // XLS/XLSX: leer TODAS las hojas y elegir la más densa
     const wb = XLSX.read(buf,{type:'array',raw:false,cellText:true,cellDates:true});
     let best = {rows:[], headers:[], score:-1, sheet:null};
     wb.SheetNames.forEach(name=>{
@@ -274,7 +270,7 @@ async function readOne(file){
   }
 }
 
-/* ======= Dropzones (múltiples archivos) ======= */
+/* ======= Dropzones ======= */
 function wireDropZone(zone){
   const which = zone.dataset.which;
   const input = zone.querySelector('input[type=file]');
@@ -304,10 +300,9 @@ function wireDropZone(zone){
       }catch(e){
         console.error(e);
         chips.appendChild(chip(f.name, null,false));
-        toast((e&&e.message)?e.message:`Error leyendo ${f.name}`,'err',3200);
+        toast((e&&e.message)?e.message:`Error leyendo ${f.name}`,'err',3800);
       }
     }
-    // detectar Decidir granular
     if(which==='DEC'){
       const h = (state.headers.DEC||[]).map(norm);
       state.decidirGranular = h.includes('order') || h.includes('numero de orden');
@@ -328,7 +323,7 @@ function wireDropZone(zone){
     handleFiles(files);
   });
 }
-document.querySelectorAll('.drop').forEach(wireDropZone);
+function wireAllDropzones(){ document.querySelectorAll('.drop').forEach(wireDropZone); }
 
 /* ======= Mapping UI ======= */
 function mountMap(containerId, which, expect, heuristics){
@@ -420,21 +415,22 @@ function autoMountMaps(){
   );
 }
 
-/* ======= Lookups (Tasas y Comisiones) ======= */
+/* ======= Lookups y Build ======= */
+const OUT_COLS = [
+  'Fechas Liquidacion','Numero de orden','Order','Tipo de Comprobante','Fecha de Comprobante',
+  'Importe Producto','Descuentos','Envio','Importe Total','Comisión (%)','Importe Comisión (AR$)',
+  'Cantidad Total de Cuotas','Costo Financiero (%)','Costo Financiero (AR$) asumido por el seller',
+  'Intereses asumidos por el cliente','Total sin impuestos','Seller'
+];
 function getMap(which,key){ return (state.map[which]||{})[key]||null; }
 function tasaLookup(tasRows){
   const mC=getMap('TAS','Cuotas'), mCon=getMap('TAS','TD% Con BSF'), mSin=getMap('TAS','TD% Sin BSF');
-  const idx={};
-  tasRows.forEach(r=>{
-    const c = nnum(r[mC]);
-    if(Number.isFinite(c)) idx[c] = {con:nnum(r[mCon]), sin:nnum(r[mSin])};
-  });
+  const idx={}; tasRows.forEach(r=>{ const c=nnum(r[mC]); if(Number.isFinite(c)) idx[c]={con:nnum(r[mCon]),sin:nnum(r[mSin])}; });
   return (cuotas, bsf)=> (idx[cuotas]||idx[parseInt(cuotas)||0]||{con:0,sin:0})[bsf?'con':'sin']||0;
 }
 function comLookup(comRows){
   const mS=getMap('COM','Seller'), mE=getMap('COM','Emisor/Brand'), mQ=getMap('COM','Cuotas'), mP=getMap('COM','Comisión (%)');
-  const t=[];
-  comRows.forEach(r=> t.push({seller:norm(r[mS]), em:norm(r[mE]||''), cuo: r[mQ]!=null? String(r[mQ]).trim():null, pct:nnum(r[mP])}));
+  const t=[]; comRows.forEach(r=> t.push({seller:norm(r[mS]), em:norm(r[mE]||''), cuo:r[mQ]!=null?String(r[mQ]).trim():null, pct:nnum(r[mP])}));
   return (seller, emisor, cuotas)=>{
     const s=norm(seller), e=norm(emisor), c= cuotas!=null? String(cuotas).trim():null;
     let row=t.find(x=>x.seller===s && x.em===e && x.cuo===c);
@@ -444,14 +440,6 @@ function comLookup(comRows){
     return row?row.pct:0;
   };
 }
-
-/* ======= Build ======= */
-const OUT_COLS = [
-  'Fechas Liquidacion','Numero de orden','Order','Tipo de Comprobante','Fecha de Comprobante',
-  'Importe Producto','Descuentos','Envio','Importe Total','Comisión (%)','Importe Comisión (AR$)',
-  'Cantidad Total de Cuotas','Costo Financiero (%)','Costo Financiero (AR$) asumido por el seller',
-  'Intereses asumidos por el cliente','Total sin impuestos','Seller'
-];
 function build(){
   state.log = [];
   const VTEX=state.raw.VTEX, DEV=state.raw.DEV, COM=state.raw.COM, TAS=state.raw.TAS, DEC=state.raw.DEC;
@@ -459,7 +447,7 @@ function build(){
   const mesLabel = $('#mes').value||$('#periodo').value||'';
   const autoBSF = $('#detectarBSF').value==='si';
 
-  // index devoluciones
+  // devoluciones por orden
   const devByOrder={};
   if(DEV.length){
     DEV.forEach(r=>{
@@ -470,7 +458,7 @@ function build(){
     });
   }
 
-  // Decidir granular/resumen
+  // decidir
   const decidirByOrder={}, decidirResumen={};
   if(DEC.length){
     const hasOrder = !!(m('DEC','Order')||m('DEC','Numero de orden'));
@@ -597,6 +585,12 @@ function build(){
 /* ======= Export ======= */
 function exportNow(){
   const fmt = $('#fmt').value || 'xlsx';
+  const OUT_COLS = [
+    'Fechas Liquidacion','Numero de orden','Order','Tipo de Comprobante','Fecha de Comprobante',
+    'Importe Producto','Descuentos','Envio','Importe Total','Comisión (%)','Importe Comisión (AR$)',
+    'Cantidad Total de Cuotas','Costo Financiero (%)','Costo Financiero (AR$) asumido por el seller',
+    'Intereses asumidos por el cliente','Total sin impuestos','Seller'
+  ];
   const rows = state.out.map(r=>{ const o={}; OUT_COLS.forEach(k=>o[k]=(r[k]!==undefined?r[k]:null)); return o; });
   if(fmt==='csv'){
     const head = OUT_COLS.join(',');
@@ -615,7 +609,7 @@ function exportNow(){
   }
 }
 
-/* ======= KPIs ======= */
+/* ======= KPIs y botones ======= */
 function refreshKPIs(){
   const k=[];
   k.push(`VTEX: ${state.raw.VTEX.length} filas`);
@@ -625,8 +619,6 @@ function refreshKPIs(){
   if(state.raw.DEC.length) k.push(`Decidir: ${state.raw.DEC.length} (${state.decidirGranular?'granular':'resumen'})`);
   setKPI(k);
 }
-
-/* ======= Botones ======= */
 document.getElementById('btnAnalizar').addEventListener('click', ()=>{
   if(!state.raw.VTEX.length){ toast('Falta Base VTEX','err'); return; }
   build();
@@ -647,18 +639,32 @@ document.getElementById('btnDescargar').addEventListener('click', ()=>{
   if(!state.blob){ toast('Generá el archivo primero','err'); return; }
   const period = (document.getElementById('periodo').value||'periodo').replace(/\s+/g,'_');
   const fmt = document.getElementById('fmt').value||'xlsx';
-  saveAs(state.blob, `LIQUIDACION_MKP_${period}.${fmt}`);
+  if(window.saveAs){ saveAs(state.blob, `LIQUIDACION_MKP_${period}.${fmt}`); }
+  else{
+    // fallback simple
+    const a=document.createElement('a'); a.href=URL.createObjectURL(state.blob); a.download=`LIQUIDACION_MKP_${period}.${fmt}`; a.click(); URL.revokeObjectURL(a.href);
+  }
 });
 document.getElementById('btnLog').addEventListener('click', ()=>{
   const csv = 'event\n' + (state.log||[]).map(x=> `"${String(x).replace(/"/g,'""')}"`).join('\n');
   const blob = new Blob([csv],{type:'text/csv;charset=utf-8'});
-  saveAs(blob, 'log_transformaciones.csv');
+  if(window.saveAs) saveAs(blob, 'log_transformaciones.csv');
+  else{ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='log_transformaciones.csv'; a.click(); URL.revokeObjectURL(a.href); }
 });
 
-/* ======= Init ======= */
-autoMountMaps();
-setKPI(['Esperando archivos…']);
-toast('Subí tus archivos para empezar','info',2400);
+/* ======= Boot ======= */
+(async function boot(){
+  try{
+    await ensureLibs();
+    wireAllDropzones();
+    autoMountMaps();
+    setKPI(['Esperando archivos…']);
+    toast('Subí tus archivos para empezar','info',2400);
+  }catch(e){
+    console.error(e);
+    toast('No pude inicializar librerías. Reintentá refrescar la página.','err',6000);
+  }
+})();
 </script>
 </body>
 </html>
