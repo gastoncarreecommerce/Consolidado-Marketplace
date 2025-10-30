@@ -5,58 +5,30 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>LIQUIDACION MKP – Consolidador</title>
 <style>
-  :root{
-    --bg:#0b0f16; --panel:#111827; --panel2:#0f1626;
-    --text:#e5e7eb; --muted:#9aa4b2;
-    --line:rgba(255,255,255,.08);
-    --brand:#22d3ee; --brand2:#6366f1;
-    --ok:#10b981; --warn:#f59e0b; --err:#ef4444; --info:#60a5fa;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:
-    radial-gradient(1200px 600px at 0% -20%,#0f162a 0%,transparent 60%),
-    linear-gradient(180deg,#0b1220,#0b0f16);color:var(--text)}
-  .wrap{max-width:1100px;margin:28px auto;padding:0 18px}
-  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-  h1{margin:0;font-size:22px;font-weight:800;letter-spacing:.2px}
-  .sub{color:var(--muted);font-size:13px;margin-top:6px}
-  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
-  .card{grid-column:span 12;background:
-    linear-gradient(180deg,var(--panel),var(--panel2));
-    border:1px solid var(--line);border-radius:14px;padding:14px}
-  @media(min-width:960px){.half{grid-column:span 6}}
-  .title{display:flex;align-items:center;gap:10px;margin:0 0 10px 0;font-size:15px}
-  .hint{color:var(--muted);font-size:12px}
-  .btn{appearance:none;border:1px solid var(--line);background:#0c1424;color:var(--text);
-       padding:10px 12px;border-radius:12px;cursor:pointer;font-weight:700}
-  .btn[disabled]{opacity:.5;cursor:not-allowed}
-  .btn.primary{border:none;background:linear-gradient(90deg,var(--brand),var(--brand2));color:#061018}
-  .btn.ghost{background:#0c1424}
-  .inputs{display:flex;flex-wrap:wrap;gap:10px}
-  .drop{position:relative;display:flex;flex-direction:column;gap:8px;align-items:flex-start;
-        padding:12px;border:1px dashed var(--line);border-radius:12px;background:#0b1222;min-height:92px}
-  .drop.drag{outline:2px dashed var(--brand);outline-offset:-4px}
-  .chips{display:flex;flex-wrap:wrap;gap:8px}
-  .chip{display:flex;align-items:center;gap:6px;background:#0d172a;border:1px solid var(--line);
-        padding:6px 8px;border-radius:999px;font-size:12px}
-  .chip .dot{width:8px;height:8px;border-radius:50%}
-  .dot.ok{background:var(--ok)} .dot.err{background:var(--err)} .dot.info{background:var(--info)}
-  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-  select,input{background:#0b1222;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
-  details{background:#0b1222;border:1px solid var(--line);border-radius:12px;padding:10px}
-  details>summary{cursor:pointer;font-weight:700;margin:-10px;padding:10px}
-  .map{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-  .map .item{display:flex;flex-direction:column;gap:6px}
-  .kpi{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
-  .kpi .item{background:#0b1222;border:1px solid var(--line);padding:8px 10px;border-radius:10px;font-size:12px}
-  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-  .toastbox{position:fixed;top:12px;right:12px;display:flex;flex-direction:column;gap:8px;z-index:50}
+  :root{--bg:#0b0f16;--panel:#111827;--panel2:#0f1626;--text:#e5e7eb;--muted:#9aa4b2;--line:rgba(255,255,255,.08);--brand:#22d3ee;--brand2:#6366f1;--ok:#10b981;--warn:#f59e0b;--err:#ef4444;--info:#60a5fa}
+  *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:
+  radial-gradient(1200px 600px at 0% -20%,#0f162a 0%,transparent 60%),linear-gradient(180deg,#0b1220,#0b0f16);color:var(--text)}
+  .wrap{max-width:1100px;margin:28px auto;padding:0 18px}header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  h1{margin:0;font-size:22px;font-weight:800;letter-spacing:.2px}.sub{color:var(--muted);font-size:13px;margin-top:6px}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}.card{grid-column:span 12;background:
+  linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:14px;padding:14px}
+  @media(min-width:960px){.half{grid-column:span 6}}.title{display:flex;align-items:center;gap:10px;margin:0 0 10px 0;font-size:15px}
+  .hint{color:var(--muted);font-size:12px}.btn{appearance:none;border:1px solid var(--line);background:#0c1424;color:var(--text);
+  padding:10px 12px;border-radius:12px;cursor:pointer;font-weight:700}.btn[disabled]{opacity:.5;cursor:not-allowed}
+  .btn.primary{border:none;background:linear-gradient(90deg,var(--brand),var(--brand2));color:#061018}.btn.ghost{background:#0c1424}
+  .inputs{display:flex;flex-wrap:wrap;gap:10px}.drop{position:relative;display:flex;flex-direction:column;gap:8px;align-items:flex-start;
+  padding:12px;border:1px dashed var(--line);border-radius:12px;background:#0b1222;min-height:92px}
+  .drop.drag{outline:2px dashed var(--brand);outline-offset:-4px}.chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{display:flex;align-items:center;gap:6px;background:#0d172a;border:1px solid var(--line);padding:6px 8px;border-radius:999px;font-size:12px}
+  .chip .dot{width:8px;height:8px;border-radius:50%}.dot.ok{background:var(--ok)}.dot.err{background:var(--err)}.dot.info{background:var(--info)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}select,input{background:#0b1222;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+  details{background:#0b1222;border:1px solid var(--line);border-radius:12px;padding:10px}details>summary{cursor:pointer;font-weight:700;margin:-10px;padding:10px}
+  .map{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.map .item{display:flex;flex-direction:column;gap:6px}
+  .kpi{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}.kpi .item{background:#0b1222;border:1px solid var(--line);padding:8px 10px;border-radius:10px;font-size:12px}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.toastbox{position:fixed;top:12px;right:12px;display:flex;flex-direction:column;gap:8px;z-index:50}
   .toast{background:#0b1222;border:1px solid var(--line);padding:10px 12px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-  .toast.ok{border-color:rgba(16,185,129,.35)}
-  .toast.err{border-color:rgba(239,68,68,.35)}
-  .toast.info{border-color:rgba(96,165,250,.35)}
-  pre{white-space:pre-wrap;word-wrap:break-word}
-  .footer{color:var(--muted);font-size:12px;margin-top:10px}
+  .toast.ok{border-color:rgba(16,185,129,.35)}.toast.err{border-color:rgba(239,68,68,.35)}.toast.info{border-color:rgba(96,165,250,.35)}
+  pre{white-space:pre-wrap;word-wrap:break-word}.footer{color:var(--muted);font-size:12px;margin-top:10px}
 </style>
 </head>
 <body>
@@ -65,7 +37,7 @@
   <header>
     <div>
       <h1>LIQUIDACION MKP – Consolidador</h1>
-      <div class="sub">Subí tus archivos, revisá el resumen y exportá el Excel con la hoja <b>LIQUIDACION</b>.</div>
+      <div class="sub">GMV, comisión y financiación por pedido conforme “Tasas ponderadas”, Decidir y reglas de negocio.</div>
     </div>
   </header>
 
@@ -92,19 +64,19 @@
           <div class="chips"></div>
         </div>
         <div class="drop" data-which="TAS">
-          <div><b>Tasas</b></div>
+          <div><b>Tasas ponderadas</b> <span class="hint">por <i>Fecha</i> + <i>Cuotas</i> + BSF/No</span></div>
           <input type="file" multiple hidden accept=".xlsx,.xls,.csv" />
           <div class="row"><button class="btn choose">Elegir</button></div>
           <div class="chips"></div>
         </div>
         <div class="drop" data-which="DEC">
-          <div><b>Decidir / Gateway</b> <span class="hint">granular o resumen</span></div>
+          <div><b>Decidir / Gateway</b> <span class="hint">granular por Order o resumen por Seller/Mes</span></div>
           <input type="file" multiple hidden accept=".xlsx,.xls,.csv" />
           <div class="row"><button class="btn choose">Elegir</button></div>
           <div class="chips"></div>
         </div>
       </div>
-      <div class="hint" style="margin-top:8px">Ves chips con nombre y <b>filas leídas</b> por archivo.</div>
+      <div class="hint" style="margin-top:8px">Chips muestran nombre y <b>filas leídas</b>.</div>
     </div>
 
     <div class="card half">
@@ -112,12 +84,8 @@
       <div class="row">
         <div>Periodo: <input id="periodo" class="mono" value="16 Sep al 15 Oct" /></div>
         <div>Mes label (<i>Fechas Liquidacion</i>): <input id="mes" class="mono" value="Septiembre" /></div>
-        <div>Detectar BSF por Decidir:
-          <select id="detectarBSF"><option value="si" selected>Sí</option><option value="no">No</option></select>
-        </div>
-        <div>Salida:
-          <select id="fmt"><option value="xlsx" selected>XLSX</option><option value="csv">CSV</option></select>
-        </div>
+        <div>Detectar BSF por Decidir: <select id="detectarBSF"><option value="si" selected>Sí</option><option value="no">No</option></select></div>
+        <div>Salida: <select id="fmt"><option value="xlsx" selected>XLSX</option><option value="csv">CSV</option></select></div>
       </div>
       <div class="kpi" id="kpi"></div>
     </div>
@@ -130,8 +98,8 @@
           <div class="card half"><h4>VTEX</h4><div class="map" id="mapVTEX"></div></div>
           <div class="card half"><h4>Devoluciones</h4><div class="map" id="mapDEV"></div></div>
           <div class="card half"><h4>Comisiones</h4><div class="map" id="mapCOM"></div><div class="hint">Seller, Emisor/Brand, Cuotas (opcional), Comisión (%)</div></div>
-          <div class="card half"><h4>Tasas</h4><div class="map" id="mapTAS"></div><div class="hint">Cuotas, TD% Con BSF, TD% Sin BSF</div></div>
-          <div class="card half"><h4>Decidir</h4><div class="map" id="mapDEC"></div><div class="hint">Si no hay “Order”, se prorratea por Seller/Mes</div></div>
+          <div class="card half"><h4>Tasas ponderadas</h4><div class="map" id="mapTAS"></div><div class="hint">Fecha, Cuotas, TD% Con BSF, TD% Sin BSF</div></div>
+          <div class="card half"><h4>Decidir</h4><div class="map" id="mapDEC"></div><div class="hint">Intereses AR$ por Order (o resumen por Seller/Mes)</div></div>
         </div>
       </details>
     </div>
@@ -151,234 +119,117 @@
 </div>
 
 <script>
-/* ===== Loader robusto: SheetJS + FileSaver ===== */
-const CDN_XLSX = [
-  "https://cdn.jsdelivr.net/npm/xlsx@0.20.2/dist/xlsx.full.min.js",
-  "https://unpkg.com/xlsx@0.20.2/dist/xlsx.full.min.js",
-  "https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"
+/* ===== Loader robusto (XLSX + FileSaver con fallback) ===== */
+const CDN_XLSX=[
+ "https://cdn.jsdelivr.net/npm/xlsx@0.20.2/dist/xlsx.full.min.js",
+ "https://unpkg.com/xlsx@0.20.2/dist/xlsx.full.min.js",
+ "https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"
 ];
-const CDN_FS = [
-  "https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js",
-  "https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"
+const CDN_FS=[
+ "https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js",
+ "https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"
 ];
-
-function loadScript(src){ return new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error("Fallo al cargar: "+src)); document.head.appendChild(s); }); }
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error("Fallo al cargar: "+src));document.head.appendChild(s)})}
 async function ensureLibs(){
-  const toasts = document.getElementById('toasts');
-  const toast = (msg,type='info',ms=2200)=>{ const t=document.createElement('div'); t.className='toast '+type; t.textContent=msg; toasts.appendChild(t); setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(-6px)'; }, ms); setTimeout(()=>{ t.remove(); }, ms+280); };
-  if(!window.XLSX){
-    let loaded=false, lastErr=null;
-    for(const url of CDN_XLSX){ try{ await loadScript(url); loaded=true; break; } catch(e){ lastErr=e; } }
-    if(!loaded){ toast("No pude cargar XLSX (SheetJS). Reintentá o revisá el firewall/CDN.","err",5000); throw lastErr||new Error("XLSX no cargó"); }
-  }
-  if(!window.saveAs){
-    let loaded=false, lastErr=null;
-    for(const url of CDN_FS){ try{ await loadScript(url); loaded=true; break; } catch(e){ lastErr=e; } }
-    if(!loaded){ toast("No pude cargar FileSaver. El export podría fallar.","warn",5000); }
-  }
+  if(!window.XLSX){let ok=false,err;for(const u of CDN_XLSX){try{await loadScript(u);ok=true;break}catch(e){err=e}}if(!ok) throw err||new Error("XLSX no cargó")}
+  if(!window.saveAs){let ok=false,err;for(const u of CDN_FS){try{await loadScript(u);ok=true;break}catch(e){err=e}}/* si no carga, usamos fallback nativo */}
 }
 
-/* ======= UX helpers ======= */
-const $ = s=>document.querySelector(s);
-const toasts = document.getElementById('toasts');
-function toast(msg,type='info',ms=2200){
-  const t=document.createElement('div');
-  t.className='toast '+type; t.textContent=msg; toasts.appendChild(t);
-  setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(-6px)'; }, ms);
-  setTimeout(()=>{ t.remove(); }, ms+280);
-}
-function chip(name, rows, ok=true){
-  const d=document.createElement('div'); d.className='chip';
-  const dot=document.createElement('span'); dot.className='dot '+(ok?'ok':'err'); d.appendChild(dot);
-  const txt=document.createElement('span'); txt.textContent=name+(rows!=null?` · ${rows} filas`:''); d.appendChild(txt);
-  return d;
-}
-function setKPI(lines){ const box=$("#kpi"); box.innerHTML=''; (lines||[]).forEach(x=>{ const d=document.createElement('div'); d.className='item'; d.textContent=x; box.appendChild(d); }); }
+/* ====== UX ====== */
+const $=s=>document.querySelector(s);
+const toasts=document.getElementById('toasts');
+function toast(msg,type='info',ms=2400){const t=document.createElement('div');t.className='toast '+type;t.textContent=msg;toasts.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(-6px)'},ms);setTimeout(()=>t.remove(),ms+280)}
+function chip(name,rows,ok=true){const d=document.createElement('div');d.className='chip';const dot=document.createElement('span');dot.className='dot '+(ok?'ok':'err');d.appendChild(dot);const txt=document.createElement('span');txt.textContent=name+(rows!=null?` · ${rows} filas`:'');d.appendChild(txt);return d}
+function setKPI(lines){const box=$("#kpi");box.innerHTML='';(lines||[]).forEach(x=>{const d=document.createElement('div');d.className='item';d.textContent=x;box.appendChild(d)})}
 
-/* ======= Estado ======= */
-const state = {
-  raw:{ VTEX:[], DEV:[], COM:[], TAS:[], DEC:[] },
-  headers:{},
-  map:{VTEX:{}, DEV:{}, COM:{}, TAS:{}, DEC:{}},
-  decidirGranular:false,
-  out:[],
-  blob:null,
-  log:[]
-};
+/* ====== Estado ====== */
+const state={raw:{VTEX:[],DEV:[],COM:[],TAS:[],DEC:[]},headers:{},map:{VTEX:{},DEV:{},COM:{},TAS:{},DEC:{}},decidirGranular:false,out:[],blob:null,log:[]};
 
-/* ======= Normalizadores ======= */
-function norm(s){ return (s||'').toString().toLowerCase().replace(/\s+/g,' ').trim(); }
-function nnum(v){
-  if(typeof v==='number') return isNaN(v)?0:v;
-  if(typeof v==='string'){ const x=v.replace(/\./g,'').replace(/,/g,'.').replace(/[^0-9.-]/g,''); const n=parseFloat(x); return isNaN(n)?0:n; }
-  if(v==null) return 0;
-  return Number(v)||0;
+/* ====== Helpers ====== */
+function norm(s){return (s||'').toString().toLowerCase().replace(/\s+/g,' ').trim()}
+function nnum(v){if(typeof v==='number') return isNaN(v)?0:v;if(typeof v==='string'){const x=v.replace(/\./g,'').replace(/,/g,'.').replace(/[^0-9.-]/g,'');const n=parseFloat(x);return isNaN(n)?0:n}if(v==null) return 0;return Number(v)||0}
+function isBSF(issuer){const s=norm(issuer);return s.includes('bsf')||s.includes('banco de servicios financieros')}
+function parseDate(d){
+  if(d instanceof Date) return new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  const s=String(d||'').trim(); if(!s) return null;
+  // intentos: yyyy-mm-dd, dd/mm/yyyy, dd-mm-yyyy
+  const m1=/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$/.exec(s);
+  const m2=/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/.exec(s);
+  let y,m,day;
+  if(m1){y=+m1[1];m=+m1[2]-1;day=+m1[3]}
+  else if(m2){y=+m2[3];m=+m2[2]-1;day=+m2[1]}
+  else return null;
+  return new Date(Date.UTC(y,m,day));
 }
-function isBSF(issuer){ const s=norm(issuer); return s.includes('bsf')||s.includes('banco de servicios financieros'); }
+function ymd(d){return d?`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`:''}
 
-/* ======= Reader robusto ======= */
-function isHeaderCell(v){ if(v==null) return false; const s=String(v).trim(); if(!s) return false; return isNaN(Number(s)); }
-function detectHeaderRow(matrix,maxScan=30){
-  for(let r=0; r<Math.min(matrix.length,maxScan); r++){
-    const row = matrix[r]||[]; const headerish = row.filter(c=>isHeaderCell(c)).length;
-    if(headerish>=2) return r;
-  } return 0;
-}
-function sheetToMatrix(ws){
-  const range = XLSX.utils.decode_range(ws['!ref']||'A1:A1'); const out=[];
-  for(let R=range.s.r; R<=range.e.r; ++R){
-    const row=[]; for(let C=range.s.c; C<=range.e.c; ++C){
-      const addr = XLSX.utils.encode_cell({r:R,c:C}); const cell = ws[addr];
-      row.push(cell? cell.w ?? cell.v : null);
-    } out.push(row);
-  } return out;
-}
-function jsonFromAnySheet(ws){
-  const mat = sheetToMatrix(ws); if(!mat.length) return {rows:[],headers:[]};
-  const hRow = detectHeaderRow(mat);
-  const headers = (mat[hRow]||[]).map(v=> String(v??'').trim());
-  const rows = [];
-  for(let r=hRow+1; r<mat.length; r++){
-    const obj={}; for(let c=0; c<headers.length; c++){ obj[ headers[c] || `col_${c}` ] = mat[r][c] ?? null; }
-    if(Object.values(obj).some(v=> v!==null && String(v).trim()!=='')) rows.push(obj);
-  }
-  return {rows, headers};
-}
+/* ====== Reader robusto ====== */
+function isHeaderCell(v){if(v==null) return false;const s=String(v).trim();if(!s) return false;return isNaN(Number(s))}
+function detectHeaderRow(matrix,maxScan=30){for(let r=0;r<Math.min(matrix.length,maxScan);r++){const row=matrix[r]||[];const headerish=row.filter(c=>isHeaderCell(c)).length;if(headerish>=2) return r}return 0}
+function sheetToMatrix(ws){const range=XLSX.utils.decode_range(ws['!ref']||'A1:A1');const out=[];for(let R=range.s.r;R<=range.e.r;++R){const row=[];for(let C=range.s.c;C<=range.e.c;++C){const addr=XLSX.utils.encode_cell({r:R,c:C});const cell=ws[addr];row.push(cell?cell.w??cell.v:null)}out.push(row)}return out}
+function jsonFromAnySheet(ws){const mat=sheetToMatrix(ws);if(!mat.length) return {rows:[],headers:[]};const hRow=detectHeaderRow(mat);const headers=(mat[hRow]||[]).map(v=>String(v??'').trim());const rows=[];for(let r=hRow+1;r<mat.length;r++){const obj={};for(let c=0;c<headers.length;c++){obj[headers[c]||`col_${c}`]=mat[r][c]??null}if(Object.values(obj).some(v=>v!==null && String(v).trim()!=='')) rows.push(obj)}return {rows,headers}}
 async function readOne(file){
   try{
-    const buf = await file.arrayBuffer();
-    const isCSV = /\.csv$/i.test(file.name);
-    if(isCSV){
-      const data = new TextDecoder().decode(new Uint8Array(buf));
-      const wb = XLSX.read(data,{type:'string',raw:false,cellText:true,cellDates:true});
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json(ws,{defval:null});
-      return {rows:json, headers: Object.keys(json[0]||{})};
-    }
-    const wb = XLSX.read(buf,{type:'array',raw:false,cellText:true,cellDates:true});
-    let best = {rows:[], headers:[], score:-1, sheet:null};
-    wb.SheetNames.forEach(name=>{
-      const ws = wb.Sheets[name];
-      const {rows, headers} = jsonFromAnySheet(ws);
-      const score = (rows?.length||0) * (headers?.length||0);
-      if(score>best.score) best = {rows, headers, score, sheet:name};
-    });
-    if(best.score<=0) return {rows:[], headers:[]};
-    return {rows:best.rows, headers:best.headers};
-  }catch(err){
-    throw new Error(`No se pudo leer ${file.name}: ${err.message||err}`);
-  }
+    const buf=await file.arrayBuffer();const isCSV=/\.csv$/i.test(file.name);
+    if(isCSV){const data=new TextDecoder().decode(new Uint8Array(buf));const wb=XLSX.read(data,{type:'string',raw:false,cellText:true,cellDates:true});const ws=wb.Sheets[wb.SheetNames[0]];const json=XLSX.utils.sheet_to_json(ws,{defval:null});return {rows:json,headers:Object.keys(json[0]||{})}}
+    const wb=XLSX.read(buf,{type:'array',raw:false,cellText:true,cellDates:true});let best={rows:[],headers:[],score:-1};
+    wb.SheetNames.forEach(name=>{const ws=wb.Sheets[name];const {rows,headers}=jsonFromAnySheet(ws);const score=(rows?.length||0)*(headers?.length||0);if(score>best.score) best={rows,headers,score}});
+    if(best.score<=0) return {rows:[],headers:[]};return {rows:best.rows,headers:best.headers}
+  }catch(err){throw new Error(`No se pudo leer ${file.name}: ${err.message||err}`)}
 }
 
-/* ======= Dropzones ======= */
+/* ====== Dropzones ====== */
 function wireDropZone(zone){
-  const which = zone.dataset.which;
-  const input = zone.querySelector('input[type=file]');
-  const chips = zone.querySelector('.chips');
-  const choose = zone.querySelector('.choose');
-
-  function enableActions(){
-    const hasVTEX = state.raw.VTEX.length>0;
-    $('#btnAnalizar').disabled = !hasVTEX;
-    $('#btnGenerar').disabled = !hasVTEX;
-  }
-
+  const which=zone.dataset.which;const input=zone.querySelector('input[type=file]');const chips=zone.querySelector('.chips');const choose=zone.querySelector('.choose');
+  function enableActions(){const hasVTEX=state.raw.VTEX.length>0;$('#btnAnalizar').disabled=!hasVTEX;$('#btnGenerar').disabled=!hasVTEX}
   async function handleFiles(files){
-    zone.classList.remove('drag');
-    toast(`Cargando ${files.length} archivo(s) en ${which}...`,'info');
+    zone.classList.remove('drag');toast(`Cargando ${files.length} archivo(s) en ${which}...`,'info');
     for(const f of files){
-      try{
-        const out = await readOne(f);
-        if(out.rows && out.rows.length){
-          state.raw[which].push(...out.rows);
-          if(!state.headers[which] && out.headers?.length) state.headers[which]=out.headers;
-          chips.appendChild(chip(f.name, out.rows.length, true));
-        }else{
-          chips.appendChild(chip(f.name, 0, false));
-          toast(`Sin filas útiles en ${f.name}`,'warn',2600);
-        }
-      }catch(e){
-        console.error(e);
-        chips.appendChild(chip(f.name, null,false));
-        toast((e&&e.message)?e.message:`Error leyendo ${f.name}`,'err',3800);
-      }
+      try{const out=await readOne(f);if(out.rows && out.rows.length){state.raw[which].push(...out.rows);if(!state.headers[which]&&out.headers?.length) state.headers[which]=out.headers;chips.appendChild(chip(f.name,out.rows.length,true))}else{chips.appendChild(chip(f.name,0,false));toast(`Sin filas útiles en ${f.name}`,'warn',2600)}}
+      catch(e){console.error(e);chips.appendChild(chip(f.name,null,false));toast(e&&e.message?e.message:`Error leyendo ${f.name}`,'err',3800)}
     }
-    if(which==='DEC'){
-      const h = (state.headers.DEC||[]).map(norm);
-      state.decidirGranular = h.includes('order') || h.includes('numero de orden');
-    }
-    autoMountMaps();
-    enableActions();
-    refreshKPIs();
-    toast(`Listo ${which}: ${state.raw[which].length} filas acumuladas`,'ok');
+    if(which==='DEC'){const h=(state.headers.DEC||[]).map(norm);state.decidirGranular=h.includes('order')||h.includes('numero de orden')}
+    autoMountMaps();enableActions();refreshKPIs();toast(`Listo ${which}: ${state.raw[which].length} filas acumuladas`,'ok')
   }
-
   choose.addEventListener('click',()=>input.click());
   input.addEventListener('change',e=> e.target.files && handleFiles([...e.target.files]));
-  zone.addEventListener('dragover',e=>{ e.preventDefault(); zone.classList.add('drag'); });
+  zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag')});
   zone.addEventListener('dragleave',()=> zone.classList.remove('drag'));
-  zone.addEventListener('drop',e=>{
-    e.preventDefault();
-    const files=[...e.dataTransfer.files].filter(f=>/\.(xlsx|xls|csv)$/i.test(f.name));
-    handleFiles(files);
-  });
+  zone.addEventListener('drop',e=>{e.preventDefault();const files=[...e.dataTransfer.files].filter(f=>/\.(xlsx|xls|csv)$/i.test(f.name));handleFiles(files)});
 }
-function wireAllDropzones(){ document.querySelectorAll('.drop').forEach(wireDropZone); }
+function wireAllDropzones(){document.querySelectorAll('.drop').forEach(wireDropZone)}
 
-/* ======= Mapping UI ======= */
-function mountMap(containerId, which, expect, heuristics){
-  const box = document.getElementById(containerId);
-  box.innerHTML='';
-  const headers = state.headers[which] || [];
-  function findHeur(key){
-    const fn = heuristics[key];
-    const hit = headers.find(h=> fn(norm(h)));
-    return hit || '';
-  }
-  expect.forEach(key=>{
-    const item=document.createElement('div'); item.className='item';
-    const lab=document.createElement('label'); lab.textContent=key; lab.style.fontSize='12px'; lab.style.opacity=.9;
-    const sel=document.createElement('select'); sel.className='mono';
-    const opt0=document.createElement('option'); opt0.value=''; opt0.textContent='(no mapear)'; sel.appendChild(opt0);
-    headers.forEach(h=>{ const o=document.createElement('option'); o.value=h; o.textContent=h; sel.appendChild(o); });
-    const pre = state.map[which][key] || findHeur(key);
-    if(pre) sel.value = pre;
-    sel.onchange=()=> state.map[which][key]=sel.value;
-    item.appendChild(lab); item.appendChild(sel); box.appendChild(item);
-    if(pre) state.map[which][key]=pre;
-  });
+/* ====== Mapeo ====== */
+function mountMap(containerId,which,expect,heur){const box=document.getElementById(containerId);box.innerHTML='';const headers=state.headers[which]||[];
+  function findHeur(key){const fn=heur[key];const hit=headers.find(h=>fn(norm(h)));return hit||''}
+  expect.forEach(key=>{const item=document.createElement('div');item.className='item';const lab=document.createElement('label');lab.textContent=key;lab.style.fontSize='12px';lab.style.opacity=.9;
+    const sel=document.createElement('select');sel.className='mono';const opt0=document.createElement('option');opt0.value='';opt0.textContent='(no mapear)';sel.appendChild(opt0);
+    headers.forEach(h=>{const o=document.createElement('option');o.value=h;o.textContent=h;sel.appendChild(o)});
+    const pre=state.map[which][key]||findHeur(key);if(pre) sel.value=pre;sel.onchange=()=> state.map[which][key]=sel.value;item.appendChild(lab);item.appendChild(sel);box.appendChild(item);if(pre) state.map[which][key]=pre;});
 }
 function autoMountMaps(){
+  // VTEX incluye SKUTOTALPRICE + SHIPPING VALUE (+ opcionales compatibles)
   mountMap('mapVTEX','VTEX',
-    ['Numero de orden','Order','Tipo de Comprobante','Fecha de Comprobante','Importe Producto','Descuentos','Envio','Importe Total','Cantidad Total de Cuotas','Seller','Emisor','Intereses asumidos por el cliente'],
+    ['Numero de orden','Order','Tipo de Comprobante','Fecha de Comprobante','SKUTOTALPRICE','SHIPPING VALUE','Cantidad Total de Cuotas','Seller','Emisor','Intereses asumidos por el cliente'],
     {
-      'Numero de orden': n=> n.includes('numero de orden'),
-      'Order': n=> n==='order' || n.includes('order'),
-      'Tipo de Comprobante': n=> n.includes('tipo de comprobante'),
-      'Fecha de Comprobante': n=> n.includes('fecha de comprobante'),
-      'Importe Producto': n=> n.includes('importe producto'),
-      'Descuentos': n=> n.includes('descuento'),
-      'Envio': n=> n==='envio' || n.includes('envío'),
-      'Importe Total': n=> n.includes('importe total'),
+      'Numero de orden': n=> n.includes('numero de orden')||n.includes('nro de orden'),
+      'Order': n=> n==='order'||n.includes('order'),
+      'Tipo de Comprobante': n=> n.includes('tipo de comprobante')||n.includes('doc'),
+      'Fecha de Comprobante': n=> n.includes('fecha de comprobante')||n.startsWith('fecha'),
+      'SKUTOTALPRICE': n=> n.includes('sku')&&n.includes('total') || n.includes('importe producto') || n.includes('valor producto'),
+      'SHIPPING VALUE': n=> n.includes('shipping')||n==='envio'||n.includes('envío'),
       'Cantidad Total de Cuotas': n=> n.includes('cuota'),
-      'Seller': n=> n==='seller' || n.includes('seller'),
-      'Emisor': n=> n.includes('emisor') || n.includes('issuer') || n.includes('banco'),
+      'Seller': n=> n==='seller'||n.includes('seller'),
+      'Emisor': n=> n.includes('emisor')||n.includes('issuer')||n.includes('banco'),
       'Intereses asumidos por el cliente': n=> n.includes('interes')||n.includes('interés')
     }
   );
   mountMap('mapDEV','DEV',
-    ['Numero de orden','Order','Tipo de Comprobante','Fecha de Comprobante','Importe Producto','Descuentos','Envio','Importe Total','Cantidad Total de Cuotas','Seller'],
+    ['Order','Numero de orden','Importe Total'],
     {
+      'Order': n=> n==='order'||n.includes('order'),
       'Numero de orden': n=> n.includes('numero de orden'),
-      'Order': n=> n==='order' || n.includes('order'),
-      'Tipo de Comprobante': n=> n.includes('tipo de comprobante'),
-      'Fecha de Comprobante': n=> n.includes('fecha de comprobante'),
-      'Importe Producto': n=> n.includes('importe producto'),
-      'Descuentos': n=> n.includes('descuento'),
-      'Envio': n=> n==='envio' || n.includes('envío'),
-      'Importe Total': n=> n.includes('importe total'),
-      'Cantidad Total de Cuotas': n=> n.includes('cuota'),
-      'Seller': n=> n==='seller' || n.includes('seller')
+      'Importe Total': n=> n.includes('importe total')||n.includes('total')
     }
   );
   mountMap('mapCOM','COM',
@@ -391,280 +242,265 @@ function autoMountMaps(){
     }
   );
   mountMap('mapTAS','TAS',
-    ['Cuotas','TD% Con BSF','TD% Sin BSF'],
+    ['Fecha','Cuotas','TD% Con BSF','TD% Sin BSF'],
     {
-      'Cuotas': n=> n.startsWith('cuota'),
+      'Fecha': n=> n.startsWith('fecha')||n.includes('day')||n.includes('period'),
+      'Cuotas': n=> n.includes('cuota'),
       'TD% Con BSF': n=> n.includes('con bsf')||n.includes('bsf'),
       'TD% Sin BSF': n=> n.includes('sin bsf')||n.includes('no bsf')
     }
   );
   mountMap('mapDEC','DEC',
-    ['Order','Numero de orden','Fecha','BIN/Issuer','Brand','Cuotas','CF AR$','Interes Cliente AR$','Seller','Mes'],
+    ['Order','Numero de orden','Intereses','BIN/Issuer','Brand','Cuotas','Seller','Mes'],
     {
-      'Order': n=> n==='order' || n.includes('order'),
+      'Order': n=> n==='order'||n.includes('order'),
       'Numero de orden': n=> n.includes('numero de orden'),
-      'Fecha': n=> n.startsWith('fecha'),
+      'Intereses': n=> n.includes('interes')||n.includes('interés'),
       'BIN/Issuer': n=> n.includes('issuer')||n.includes('emisor')||n.includes('bin')||n.includes('banco'),
       'Brand': n=> n.includes('brand')||n.includes('marca')||n.includes('tarjeta'),
       'Cuotas': n=> n.includes('cuota'),
-      'CF AR$': n=> n.includes('cf')||n.includes('financ'),
-      'Interes Cliente AR$': n=> n.includes('interes')||n.includes('interés'),
       'Seller': n=> n.includes('seller')||n.includes('comercio'),
-      'Mes': n=> n==='mes' || n.includes('periodo')
+      'Mes': n=> n==='mes'||n.includes('periodo')
     }
   );
 }
 
-/* ======= Lookups y Build ======= */
-const OUT_COLS = [
-  'Fechas Liquidacion','Numero de orden','Order','Tipo de Comprobante','Fecha de Comprobante',
-  'Importe Producto','Descuentos','Envio','Importe Total','Comisión (%)','Importe Comisión (AR$)',
-  'Cantidad Total de Cuotas','Costo Financiero (%)','Costo Financiero (AR$) asumido por el seller',
-  'Intereses asumidos por el cliente','Total sin impuestos','Seller'
-];
-function getMap(which,key){ return (state.map[which]||{})[key]||null; }
+/* ====== Lookups ====== */
+function getMap(which,key){return (state.map[which]||{})[key]||null}
+
+/* Tasas ponderadas: índice por fecha (YYYY-MM-DD) + cuotas; devuelve % (decimal) según BSF/No */
 function tasaLookup(tasRows){
-  const mC=getMap('TAS','Cuotas'), mCon=getMap('TAS','TD% Con BSF'), mSin=getMap('TAS','TD% Sin BSF');
-  const idx={}; tasRows.forEach(r=>{ const c=nnum(r[mC]); if(Number.isFinite(c)) idx[c]={con:nnum(r[mCon]),sin:nnum(r[mSin])}; });
-  return (cuotas, bsf)=> (idx[cuotas]||idx[parseInt(cuotas)||0]||{con:0,sin:0})[bsf?'con':'sin']||0;
+  const mF=getMap('TAS','Fecha'), mC=getMap('TAS','Cuotas'), mCon=getMap('TAS','TD% Con BSF'), mSin=getMap('TAS','TD% Sin BSF');
+  const idx={byDate:{}, byCuota:{}};
+  tasRows.forEach(r=>{
+    const d=parseDate(r[mF]); const k=ymd(d);
+    const c=parseInt(nnum(r[mC])); const con=nnum(r[mCon]); const sin=nnum(r[mSin]);
+    if(Number.isFinite(c)){
+      idx.byCuota[c]={con,sin}; // fallback general por cuota
+      if(k){ idx.byDate[k]=idx.byDate[k]||{}; idx.byDate[k][c]={con,sin}; }
+    }
+  });
+  return (fecha, cuotas, bsf)=>{
+    const d=parseDate(fecha); const k=ymd(d); const c=parseInt(cuotas)||0;
+    let rec = (idx.byDate[k] && idx.byDate[k][c]) || idx.byCuota[c] || null;
+    if(!rec) return 0;
+    return (bsf? rec.con : rec.sin) || 0;
+  }
 }
+
+/* Comisión % por Seller/Emisor/Cuotas (igual que antes), pero se aplicará a SKUTOTALPRICE */
 function comLookup(comRows){
   const mS=getMap('COM','Seller'), mE=getMap('COM','Emisor/Brand'), mQ=getMap('COM','Cuotas'), mP=getMap('COM','Comisión (%)');
-  const t=[]; comRows.forEach(r=> t.push({seller:norm(r[mS]), em:norm(r[mE]||''), cuo:r[mQ]!=null?String(r[mQ]).trim():null, pct:nnum(r[mP])}));
-  return (seller, emisor, cuotas)=>{
-    const s=norm(seller), e=norm(emisor), c= cuotas!=null? String(cuotas).trim():null;
+  const t=[];
+  comRows.forEach(r=> t.push({seller:norm(r[mS]), em:norm(r[mE]||''), cuo:r[mQ]!=null?String(r[mQ]).trim():null, pct:nnum(r[mP])}));
+  return (seller,emisor,cuotas)=>{
+    const s=norm(seller), e=norm(emisor), c=cuotas!=null?String(cuotas).trim():null;
     let row=t.find(x=>x.seller===s && x.em===e && x.cuo===c);
     if(!row) row=t.find(x=>x.seller===s && x.em===e && x.cuo==null);
     if(!row) row=t.find(x=>x.seller===s && (x.em===''||x.em==='*'||x.em==='general'));
     if(!row) row=t.find(x=> (x.seller===''||x.seller==='*'||x.seller==='general') && (x.em===''||x.em==='*'||x.em==='general'));
     return row?row.pct:0;
-  };
+  }
 }
-function build(){
-  state.log = [];
-  const VTEX=state.raw.VTEX, DEV=state.raw.DEV, COM=state.raw.COM, TAS=state.raw.TAS, DEC=state.raw.DEC;
-  const m = (w,k)=> getMap(w,k);
-  const mesLabel = $('#mes').value||$('#periodo').value||'';
-  const autoBSF = $('#detectarBSF').value==='si';
 
-  // devoluciones por orden
+/* ====== Build con reglas nuevas ====== */
+const OUT_COLS=[
+ 'Fechas Liquidacion','Numero de orden','Order','Tipo de Comprobante','Fecha de Comprobante',
+ 'Importe Producto','Descuentos','Envio','GMV','Comisión (%)','Importe Comisión (AR$)',
+ 'Cantidad Total de Cuotas','Costo Financiero (%)','Costo Financiero (AR$) asumido por el seller',
+ 'Intereses asumidos por el cliente','Total sin impuestos','Seller'
+];
+
+function build(){
+  state.log=[];
+  const VTEX=state.raw.VTEX, DEV=state.raw.DEV, COM=state.raw.COM, TAS=state.raw.TAS, DEC=state.raw.DEC;
+  const m=(w,k)=>getMap(w,k);
+  const mesLabel=$('#mes').value||$('#periodo').value||'';
+  const autoBSF=$('#detectarBSF').value==='si';
+
+  // Index devoluciones por Order (restan del GMV si las querés considerar; por ahora no afectan GMV directo)
   const devByOrder={};
   if(DEV.length){
     DEV.forEach(r=>{
-      const order = (r[m('DEV','Order')]||r[m('DEV','Numero de orden')]||'').toString().trim();
+      const order=(r[m('DEV','Order')]||r[m('DEV','Numero de orden')]||'').toString().trim();
       if(!order) return;
-      devByOrder[order] = devByOrder[order] || {tot:0};
-      devByOrder[order].tot += nnum(r[m('DEV','Importe Total')]);
+      devByOrder[order]=(devByOrder[order]||0)+nnum(r[m('DEV','Importe Total')]);
     });
   }
 
-  // decidir
+  // Decidir granular/resumen
   const decidirByOrder={}, decidirResumen={};
   if(DEC.length){
-    const hasOrder = !!(m('DEC','Order')||m('DEC','Numero de orden'));
-    state.decidirGranular = hasOrder;
+    const hasOrder=!!(m('DEC','Order')||m('DEC','Numero de orden'));
+    state.decidirGranular=hasOrder;
     if(hasOrder){
       DEC.forEach(r=>{
-        const order=(r[m('DEC','Order')]||r[m('DEC','Numero de orden')]||'').toString().trim();
-        if(!order) return;
-        decidirByOrder[order] = {
+        const order=(r[m('DEC','Order')]||r[m('DEC','Numero de orden')]||'').toString().trim(); if(!order) return;
+        decidirByOrder[order]={
+          intereses:nnum(r[m('DEC','Intereses')]),
           issuer:r[m('DEC','BIN/Issuer')]||r[m('DEC','Brand')]||'',
           brand:r[m('DEC','Brand')]||'',
           cuotas:nnum(r[m('DEC','Cuotas')]),
-          cf:nnum(r[m('DEC','CF AR$')]),
-          ic:nnum(r[m('DEC','Interes Cliente AR$')]),
         };
       });
     }else{
       DEC.forEach(r=>{
-        const seller=norm(r[m('DEC','Seller')]||'');
-        const mes= norm(r[m('DEC','Mes')]||mesLabel);
-        const key=seller+'||'+mes;
-        decidirResumen[key] = decidirResumen[key]||{cf:0,ic:0};
-        decidirResumen[key].cf += nnum(r[m('DEC','CF AR$')]);
-        decidirResumen[key].ic += nnum(r[m('DEC','Interes Cliente AR$')]);
+        const seller=norm(r[m('DEC','Seller')]||''); const mes=norm(r[m('DEC','Mes')]||mesLabel);
+        const key=seller+'||'+mes; decidirResumen[key]=decidirResumen[key]||{ic:0};
+        decidirResumen[key].ic+=nnum(r[m('DEC','Intereses')]);
       });
     }
   }
 
-  const tasaFn = TAS.length ? tasaLookup(TAS) : ()=>0;
-  const comFn  = COM.length ? comLookup(COM) : ()=>0;
+  const tasaFn=TAS.length? tasaLookup(TAS) : ()=>0;
+  const comFn =COM.length? comLookup(COM)  : ()=>0;
 
-  const out=[], sumBySellerMes={};
+  const out=[], sumBySellerMes={base:{}};
   VTEX.forEach(r=>{
-    const numeroOrden = r[m('VTEX','Numero de orden')];
-    const order = (r[m('VTEX','Order')]||numeroOrden||'').toString().trim();
-    if(!order) return;
+    const order=(r[m('VTEX','Order')]||r[m('VTEX','Numero de orden')]||'').toString().trim(); if(!order) return;
     const tipo = r[m('VTEX','Tipo de Comprobante')] || 'V';
     const fecha = r[m('VTEX','Fecha de Comprobante')] || '';
-    const prod  = nnum(r[m('VTEX','Importe Producto')]);
-    const desc  = nnum(r[m('VTEX','Descuentos')]);
-    const envio = nnum(r[m('VTEX','Envio')]);
-    let total   = r[m('VTEX','Importe Total')]!=null? nnum(r[m('VTEX','Importe Total')]) : (prod - desc + envio);
-    let cuotas  = nnum(r[m('VTEX','Cantidad Total de Cuotas')]);
+    const prod  = nnum(r[m('VTEX','SKUTOTALPRICE')]);          // SOLO producto
+    const envio = nnum(r[m('VTEX','SHIPPING VALUE')]);         // Envío
+    const cuotas  = nnum(r[m('VTEX','Cantidad Total de Cuotas')]);
     const seller= (r[m('VTEX','Seller')]||'').toString().trim();
     let emisor  = r[m('VTEX','Emisor')] || '';
 
-    if(devByOrder[order]){
-      total -= devByOrder[order].tot;
-      state.log.push(`DEV ${order}: -${devByOrder[order].tot.toFixed(2)}`);
-    }
+    // GMV: producto + envío (sin descuentos)
+    let gmv = prod + envio;
 
+    // Restar devoluciones del periodo si vienen como comprobante aparte (opcional: comentar si no se desea)
+    if(devByOrder[order]){ gmv -= devByOrder[order]; state.log.push(`DEV ${order}: -${devByOrder[order].toFixed(2)} de GMV`); }
+
+    // Info desde Decidir (granular)
     const dec = decidirByOrder[order];
     if(dec){
-      if(!cuotas && dec.cuotas) cuotas = dec.cuotas;
       if(!emisor && dec.issuer) emisor = dec.issuer;
     }
-
     const bsf = autoBSF ? isBSF(emisor) : false;
-    const pctCom = comFn(seller, emisor, cuotas);
-    const impCom = total * (pctCom||0);
 
-    let pctCF = tasaFn(cuotas||0, bsf);
-    let impCF = total * (pctCF||0);
+    // Comisión: % aplicado SOLO a SKUTOTALPRICE
+    const pctCom = comFn(seller, emisor, cuotas) || 0;
+    const impCom = prod * pctCom;
 
-    if(dec && dec.cf){
-      impCF = dec.cf;
-      pctCF = total? (impCF/total):0;
-      state.log.push(`DEC CF override ${order}: ${impCF.toFixed(2)} (${(pctCF*100).toFixed(2)}%)`);
+    // Interés cliente y CF Seller según reglas:
+    let interesCliente = dec? dec.intereses : null; // puede ser null si no hay granular
+    let pctCF = 0, impCF = 0;
+
+    // 1 pago ⇒ ambos 0
+    if((cuotas||0)<=1){
+      interesCliente = 0;
+      pctCF = 0; impCF = 0;
+    }else{
+      // Si Decidir reporta interés > 0 ⇒ CF Seller = 0
+      if(interesCliente!=null && interesCliente>0){
+        pctCF = 0; impCF = 0;
+      }else{
+        // Sin interés cliente ⇒ CF Seller = GMV × tasa(día,cuotas,BSF)
+        const tasa = tasaFn(fecha, cuotas, bsf) || 0;
+        pctCF = tasa;
+        impCF = gmv * tasa;
+        // Si Decidir granular trae explícitamente 0, mantenemos CF calculado
+      }
+      // Si Decidir granular no está y hay resumen por Seller/Mes, prorrateamos IC después (más abajo)
+      if(interesCliente==null) interesCliente = 0;
     }
 
-    const intCli = dec? dec.ic : 0;
-    const totalSin = total - impCom - impCF;
+    const totalSinImpuestos = gmv - impCom - impCF;
 
-    const row = {
-      'Fechas Liquidacion': mesLabel,
-      'Numero de orden': numeroOrden || order,
+    const row={
+      'Fechas Liquidacion': $('#mes').value || $('#periodo').value || '',
+      'Numero de orden': order,
       'Order': order,
       'Tipo de Comprobante': tipo,
       'Fecha de Comprobante': fecha,
       'Importe Producto': prod,
-      'Descuentos': desc,
+      'Descuentos': 0, // ya no se usan para GMV
       'Envio': envio,
-      'Importe Total': total,
-      'Comisión (%)': pctCom||0,
+      'GMV': gmv,
+      'Comisión (%)': pctCom,
       'Importe Comisión (AR$)': impCom,
       'Cantidad Total de Cuotas': cuotas||0,
-      'Costo Financiero (%)': pctCF||0,
+      'Costo Financiero (%)': pctCF,
       'Costo Financiero (AR$) asumido por el seller': impCF,
-      'Intereses asumidos por el cliente': intCli||0,
-      'Total sin impuestos': totalSin,
+      'Intereses asumidos por el cliente': interesCliente||0,
+      'Total sin impuestos': totalSinImpuestos,
       'Seller': seller
     };
     out.push(row);
 
-    const key = norm(seller)+'||'+norm(mesLabel||'');
-    sumBySellerMes[key] = sumBySellerMes[key] || {total:0, idx:[]};
-    sumBySellerMes[key].total += total;
-    sumBySellerMes[key].idx.push(out.length-1);
+    // Para prorrateo de Decidir resumen por Seller/Mes usamos base = GMV
+    const key = norm(seller)+'||'+norm($('#mes').value||'');
+    sumBySellerMes.base[key]=sumBySellerMes.base[key]||{gmv:0, idx:[]};
+    sumBySellerMes.base[key].gmv += gmv;
+    sumBySellerMes.base[key].idx.push(out.length-1);
   });
 
-  // prorrateo Decidir resumen
+  // Prorrateo Decidir (resumen): solo INTERESES CLIENTE; si llega a haber CF en resumen (raro) podríamos sumarlo similar.
   Object.entries(decidirResumen).forEach(([key,vals])=>{
-    const bucket = sumBySellerMes[key];
+    const bucket = sumBySellerMes.base[key];
     if(!bucket){ state.log.push(`WARN Decidir resumen sin match VTEX: ${key}`); return; }
-    const base = bucket.total || 0;
+    const base = bucket.gmv || 0;
     bucket.idx.forEach(i=>{
       const row = out[i];
-      const w = base? row['Importe Total']/base : 0;
-      const addCF = vals.cf*w, addIC = vals.ic*w;
-      if(addCF){
-        row['Costo Financiero (AR$) asumido por el seller'] += addCF;
-        const newPct = row['Importe Total']? row['Costo Financiero (AR$) asumido por el seller']/row['Importe Total'] : 0;
-        row['Costo Financiero (%)'] = newPct;
+      const w = base? (row['GMV']/base) : 0;
+      const addIC = vals.ic*w;
+      // Regla: si IC > 0 ⇒ CF Seller = 0 (override)
+      if(addIC>0){
+        row['Intereses asumidos por el cliente'] += addIC;
+        row['Costo Financiero (AR$) asumido por el seller'] = 0;
+        row['Costo Financiero (%)'] = 0;
       }
-      if(addIC){ row['Intereses asumidos por el cliente'] += addIC; }
-      row['Total sin impuestos'] = row['Importe Total'] - row['Importe Comisión (AR$)'] - row['Costo Financiero (AR$) asumido por el seller'];
+      row['Total sin impuestos'] = row['GMV'] - row['Importe Comisión (AR$)'] - row['Costo Financiero (AR$) asumido por el seller'];
     });
-    state.log.push(`DEC resumen ${key}: CF=${vals.cf.toFixed(2)} IC=${vals.ic.toFixed(2)} prorrateado`);
+    state.log.push(`DEC resumen ${key}: IC=${vals.ic.toFixed(2)} prorrateado`);
   });
 
-  state.out = out;
+  state.out=out;
 }
 
-/* ======= Export ======= */
+/* ====== Export ====== */
 function exportNow(){
-  const fmt = $('#fmt').value || 'xlsx';
-  const OUT_COLS = [
-    'Fechas Liquidacion','Numero de orden','Order','Tipo de Comprobante','Fecha de Comprobante',
-    'Importe Producto','Descuentos','Envio','Importe Total','Comisión (%)','Importe Comisión (AR$)',
-    'Cantidad Total de Cuotas','Costo Financiero (%)','Costo Financiero (AR$) asumido por el seller',
-    'Intereses asumidos por el cliente','Total sin impuestos','Seller'
-  ];
-  const rows = state.out.map(r=>{ const o={}; OUT_COLS.forEach(k=>o[k]=(r[k]!==undefined?r[k]:null)); return o; });
+  const fmt=$('#fmt').value||'xlsx';
+  const rows=state.out.map(r=>{const o={};OUT_COLS.forEach(k=>o[k]=(r[k]!==undefined?r[k]:null));return o});
   if(fmt==='csv'){
-    const head = OUT_COLS.join(',');
-    const body = rows.map(r=> OUT_COLS.map(k=>{
-      const v=r[k];
-      if(typeof v==='string') return `"${v.replace(/"/g,'""')}"`;
-      if(typeof v==='number') return String(v);
-      return v==null?'':String(v);
-    }).join(',')).join('\n');
-    state.blob = new Blob([head+'\n'+body],{type:'text/csv;charset=utf-8'});
+    const head=OUT_COLS.join(',');const body=rows.map(r=>OUT_COLS.map(k=>{const v=r[k];if(typeof v==='string') return `"${v.replace(/"/g,'""')}"`;if(typeof v==='number') return String(v);return v==null?'':String(v)}).join(',')).join('\n');
+    state.blob=new Blob([head+'\n'+body],{type:'text/csv;charset=utf-8'});
   }else{
-    const ws = XLSX.utils.json_to_sheet(rows,{header:OUT_COLS});
-    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'LIQUIDACION');
-    const out = XLSX.write(wb,{bookType:'xlsx',type:'array'});
-    state.blob = new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const ws=XLSX.utils.json_to_sheet(rows,{header:OUT_COLS});const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'LIQUIDACION');const out=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+    state.blob=new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
   }
 }
 
-/* ======= KPIs y botones ======= */
+/* ====== KPIs & Botones ====== */
 function refreshKPIs(){
-  const k=[];
-  k.push(`VTEX: ${state.raw.VTEX.length} filas`);
+  const k=[];k.push(`VTEX: ${state.raw.VTEX.length} filas`);
   if(state.raw.DEV.length) k.push(`Devoluciones: ${state.raw.DEV.length}`);
   if(state.raw.COM.length) k.push(`Comisiones: ${state.raw.COM.length}`);
-  if(state.raw.TAS.length) k.push(`Tasas: ${state.raw.TAS.length}`);
+  if(state.raw.TAS.length) k.push(`Tasas ponderadas: ${state.raw.TAS.length}`);
   if(state.raw.DEC.length) k.push(`Decidir: ${state.raw.DEC.length} (${state.decidirGranular?'granular':'resumen'})`);
   setKPI(k);
 }
-document.getElementById('btnAnalizar').addEventListener('click', ()=>{
-  if(!state.raw.VTEX.length){ toast('Falta Base VTEX','err'); return; }
-  build();
-  document.getElementById('btnDescargar').disabled = true;
-  document.getElementById('btnLog').disabled = false;
-  document.getElementById('logpre').textContent = state.log.join('\n');
-  toast(`Órdenes procesadas: ${state.out.length}`,'ok');
+document.getElementById('btnAnalizar').addEventListener('click',()=>{
+  if(!state.raw.VTEX.length){toast('Falta Base VTEX','err');return}
+  build();$('#btnDescargar').disabled=true;$('#btnLog').disabled=false;$('#logpre').textContent=state.log.join('\n');toast(`Órdenes procesadas: ${state.out.length}`,'ok')
 });
-document.getElementById('btnGenerar').addEventListener('click', ()=>{
-  if(!state.raw.VTEX.length){ toast('Falta Base VTEX','err'); return; }
-  build(); exportNow();
-  document.getElementById('btnDescargar').disabled = false;
-  document.getElementById('btnLog').disabled = false;
-  document.getElementById('logpre').textContent = state.log.join('\n');
-  toast('Archivo listo para descargar','ok');
+document.getElementById('btnGenerar').addEventListener('click',()=>{
+  if(!state.raw.VTEX.length){toast('Falta Base VTEX','err');return}
+  build();exportNow();$('#btnDescargar').disabled=false;$('#btnLog').disabled=false;$('#logpre').textContent=state.log.join('\n');toast('Archivo listo para descargar','ok')
 });
-document.getElementById('btnDescargar').addEventListener('click', ()=>{
-  if(!state.blob){ toast('Generá el archivo primero','err'); return; }
-  const period = (document.getElementById('periodo').value||'periodo').replace(/\s+/g,'_');
-  const fmt = document.getElementById('fmt').value||'xlsx';
-  if(window.saveAs){ saveAs(state.blob, `LIQUIDACION_MKP_${period}.${fmt}`); }
-  else{
-    // fallback simple
-    const a=document.createElement('a'); a.href=URL.createObjectURL(state.blob); a.download=`LIQUIDACION_MKP_${period}.${fmt}`; a.click(); URL.revokeObjectURL(a.href);
-  }
+document.getElementById('btnDescargar').addEventListener('click',()=>{
+  if(!state.blob){toast('Generá el archivo primero','err');return}
+  const period=($('#periodo').value||'periodo').replace(/\s+/g,'_');const fmt=$('#fmt').value||'xlsx';
+  if(window.saveAs) saveAs(state.blob,`LIQUIDACION_MKP_${period}.${fmt}`); else{const a=document.createElement('a');a.href=URL.createObjectURL(state.blob);a.download=`LIQUIDACION_MKP_${period}.${fmt}`;a.click();URL.revokeObjectURL(a.href)}
 });
-document.getElementById('btnLog').addEventListener('click', ()=>{
-  const csv = 'event\n' + (state.log||[]).map(x=> `"${String(x).replace(/"/g,'""')}"`).join('\n');
-  const blob = new Blob([csv],{type:'text/csv;charset=utf-8'});
-  if(window.saveAs) saveAs(blob, 'log_transformaciones.csv');
-  else{ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='log_transformaciones.csv'; a.click(); URL.revokeObjectURL(a.href); }
+document.getElementById('btnLog').addEventListener('click',()=>{
+  const csv='event\n'+(state.log||[]).map(x=>`"${String(x).replace(/"/g,'""')}"`).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  if(window.saveAs) saveAs(blob,'log_transformaciones.csv'); else{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='log_transformaciones.csv';a.click();URL.revokeObjectURL(a.href)}
 });
 
-/* ======= Boot ======= */
-(async function boot(){
-  try{
-    await ensureLibs();
-    wireAllDropzones();
-    autoMountMaps();
-    setKPI(['Esperando archivos…']);
-    toast('Subí tus archivos para empezar','info',2400);
-  }catch(e){
-    console.error(e);
-    toast('No pude inicializar librerías. Reintentá refrescar la página.','err',6000);
-  }
-})();
+/* ====== Boot ====== */
+(async function boot(){try{await ensureLibs();wireAllDropzones();autoMountMaps();setKPI(['Esperando archivos…']);toast('Subí tus archivos para empezar','info',2400)}catch(e){console.error(e);toast('No pude inicializar librerías. Refrescá la página.','err',6000)}})();
 </script>
 </body>
 </html>
